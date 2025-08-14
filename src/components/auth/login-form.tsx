@@ -87,7 +87,7 @@ export function LoginForm() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-primary">EcommerceVet</h1>
-          <p className="text-muted-foreground">Inicia sesión en tu cuenta</p>
+          <p className="text-gray-600 mt-2">Accede a tu cuenta</p>
         </div>
 
         {/* Demo Credentials */}
@@ -115,9 +115,9 @@ export function LoginForm() {
         </Card>
 
         {/* Login Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Iniciar Sesión</CardTitle>
+        <Card className='shadow-xl'>
+          <CardHeader className='space-y-1'>
+            <CardTitle className='text-2xl text-center'>Bienvenido</CardTitle>
             <CardDescription>
               Ingresa tus credenciales para acceder a tu cuenta
             </CardDescription>
