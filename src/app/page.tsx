@@ -52,7 +52,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-background py-20">
+      <section className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-background py-10 sm:py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
@@ -83,14 +83,14 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative flex justify-center lg:justify-start">
               <div className="relative z-10">
                 <Image
                   src="/pets-hero.webp"
                   alt="Veterinario cuidando mascota"
                   width={600}
                   height={400}
-                  className="rounded-2xl shadow-2xl"
+                  className="rounded-2xl shadow-2xl w-full max-w-sm sm:max-w lg:max-w-[600px] h-auto"
                   priority
                 />
               </div>
@@ -98,21 +98,22 @@ export default function HomePage() {
               <div className="absolute -top-4 -right-4 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
               <div className="absolute -bottom-4 -left-4 w-72 h-72 bg-secondary/20 rounded-full blur-3xl"></div>
             </div>
-            {/* Stats */}
-      <div className="flex justify-end gap-12 pt-8">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-primary">500+</div>
-          <div className="text-sm text-muted-foreground">Productos</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-primary">1000+</div>
-          <div className="text-sm text-muted-foreground">Clientes</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-primary">24/7</div>
-          <div className="text-sm text-muted-foreground">Emergencias</div>
-        </div>
-      </div>
+          </div>
+
+          {/* Stats */}
+          <div className="pt-12 flex flex-nowrap justify-center gap-12 sm:gap-28 lg:gap-40">
+            <div className="text-center shrink-0">
+              <div className="text-2xl font-bold text-primary">500+</div>
+              <div className="text-sm text-muted-foreground">Productos</div>
+            </div>
+            <div className="text-center shrink-0">
+              <div className="text-2xl font-bold text-primary">1000+</div>
+              <div className="text-sm text-muted-foreground">Clientes</div>
+            </div>
+            <div className="text-center shrink-0">
+              <div className="text-2xl font-bold text-primary">24/7</div>
+              <div className="text-sm text-muted-foreground">Emergencias</div>
+            </div>
           </div>
         </div>
       </section>
