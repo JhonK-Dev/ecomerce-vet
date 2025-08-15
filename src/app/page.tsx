@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/ecommerce/product-card';
-import { 
-  ShoppingCart, 
-  Calendar, 
-  Heart, 
+import {
+  ShoppingCart,
+  Calendar,
+  Heart,
   Star,
   Truck,
   Shield,
@@ -57,19 +57,16 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <div className="space-y-4">
-                <Badge variant="secondary" className="w-fit">
-                  Clinica Veterinaria Profesional
-                </Badge>
                 <h1 className="text-4xl lg:text-6xl font-bold text-primary leading-tight">
                   Cuidamos a tu mascota con
                   <span className="text-foreground"> amor y profesionalismo</span>
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Tu clinica veterinaria de confianza. Productos de calidad, servicios especializados 
+                  Tu clinica veterinaria de confianza. Productos de calidad, servicios especializados
                   y gestion digital de historias clinicas para el bienestar de tu mascota.
                 </p>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild>
                   <Link href="/productos">
@@ -84,28 +81,12 @@ export default function HomePage() {
                   </Link>
                 </Button>
               </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-6 pt-8">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">500+</div>
-                  <div className="text-sm text-muted-foreground">Productos</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">1000+</div>
-                  <div className="text-sm text-muted-foreground">Clientes</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">24/7</div>
-                  <div className="text-sm text-muted-foreground">Emergencias</div>
-                </div>
-              </div>
             </div>
 
             <div className="relative">
               <div className="relative z-10">
                 <Image
-                  src="/hero-vet.jpg"
+                  src="/pets-hero.webp"
                   alt="Veterinario cuidando mascota"
                   width={600}
                   height={400}
@@ -117,9 +98,25 @@ export default function HomePage() {
               <div className="absolute -top-4 -right-4 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
               <div className="absolute -bottom-4 -left-4 w-72 h-72 bg-secondary/20 rounded-full blur-3xl"></div>
             </div>
+            {/* Stats */}
+      <div className="flex justify-end gap-12 pt-8">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-primary">500+</div>
+          <div className="text-sm text-muted-foreground">Productos</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-primary">1000+</div>
+          <div className="text-sm text-muted-foreground">Clientes</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold text-primary">24/7</div>
+          <div className="text-sm text-muted-foreground">Emergencias</div>
+        </div>
+      </div>
           </div>
         </div>
       </section>
+
 
       {/* Features Section */}
       <section className="py-16 bg-muted/30">
@@ -129,7 +126,7 @@ export default function HomePage() {
               Por que elegir EcommerceVet?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Ofrecemos una experiencia completa para el cuidado de tu mascota, 
+              Ofrecemos una experiencia completa para el cuidado de tu mascota,
               combinando productos de calidad con servicios veterinarios profesionales.
             </p>
           </div>
@@ -229,7 +226,7 @@ export default function HomePage() {
               Nuestros Servicios
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Ofrecemos una amplia gama de servicios veterinarios para mantener 
+              Ofrecemos una amplia gama de servicios veterinarios para mantener
               a tu mascota saludable y feliz.
             </p>
           </div>
@@ -244,7 +241,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Examenes completos, diagnosticos y tratamientos personalizados 
+                  Examenes completos, diagnosticos y tratamientos personalizados
                   para tu mascota.
                 </p>
                 <Button variant="outline" size="sm" asChild>
@@ -262,7 +259,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Programas completos de vacunacion para proteger a tu mascota 
+                  Programas completos de vacunacion para proteger a tu mascota
                   de enfermedades.
                 </p>
                 <Button variant="outline" size="sm" asChild>
@@ -280,7 +277,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Procedimientos quirurgicos con tecnologia avanzada y 
+                  Procedimientos quirurgicos con tecnologia avanzada y
                   cuidado post-operatorio.
                 </p>
                 <Button variant="outline" size="sm" asChild>
