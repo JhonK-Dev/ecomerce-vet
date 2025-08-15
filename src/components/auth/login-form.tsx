@@ -84,24 +84,35 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen relative flex items-center justify-center p-4">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url(/dogs.webp)',
+        }}
+      >
+        {/* Overlay for better readability */}
+        <div className="absolute inset-0 bg-black/40"></div>
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-2xl">
-                🐕
+            <div className="h-16 w-16 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <span className="text-primary font-bold text-3xl">
+                🐾
               </span>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-primary">EcommerceVet</h1>
-          <p className="text-gray-600 mt-2">Accede a tu cuenta</p>
+          <h1 className="text-3xl font-bold text-white drop-shadow-lg">EcommerceVet</h1>
+          <p className="text-white/90 mt-2 drop-shadow-md">Tu clínica veterinaria de confianza</p>
         </div>
 
-        {/* Demo Credentials */}
         {/* Login Form */}
-        <Card className="shadow-xl">
+        <Card className="shadow-2xl bg-white/95 backdrop-blur-sm border-0">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Bienvenido</CardTitle>
             <CardDescription className="text-center">
@@ -268,14 +279,14 @@ export function LoginForm() {
         </Card>
 
         {/* Additional Info */}
-        <div className="text-center text-xs text-muted-foreground">
-          <p>Al iniciar sesión, aceptas nuestros</p>
-          <div className="space-x-1">
-            <Link href="/terminos" className="text-primary hover:underline">
+        <div className="text-center text-xs text-white/80">
+          <p className="drop-shadow-md">Al iniciar sesión, aceptas nuestros</p>
+          <div className="space-x-1 mt-1">
+            <Link href="/terminos" className="text-white hover:text-white/80 underline drop-shadow-md">
               Términos de Servicio
             </Link>
             <span>y</span>
-            <Link href="/privacidad" className="text-primary hover:underline">
+            <Link href="/privacidad" className="text-white hover:text-white/80 underline drop-shadow-md">
               Política de Privacidad
             </Link>
           </div>
