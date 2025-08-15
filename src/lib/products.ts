@@ -274,7 +274,8 @@ export class ProductService {
     // Aplicar ordenamiento
     if (pagination.sortBy) {
       filteredProducts.sort((a, b) => {
-        let aValue: any, bValue: any;
+  let aValue: string | number | Date;
+  let bValue: string | number | Date;
         
         switch (pagination.sortBy) {
           case 'price':

@@ -1,86 +1,113 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { X, Filter, RotateCcw } from 'lucide-react';
-import { ProductCategory, ProductFilters } from '@/types';
-import { ProductService } from '@/lib/products';
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { Slider } from '@/components/ui/slider'
+import { X, Filter, RotateCcw } from 'lucide-react'
+import { ProductCategory, ProductFilters } from '@/types'
+import { ProductService } from '@/lib/products'
 
 interface ProductFiltersProps {
-  filters: ProductFilters;
-  onFiltersChange: (filters: ProductFilters) => void;
-  className?: string;
+  filters: ProductFilters
+  onFiltersChange: (filters: ProductFilters) => void
+  className?: string
 }
 
-export function ProductFiltersComponent({ filters, onFiltersChange, className }: ProductFiltersProps) {
-  const [categories, setCategories] = useState<{ value: ProductCategory; label: string; count: number }[]>([]);
-  const [brands, setBrands] = useState<{ value: string; label: string; count: number }[]>([]);
-  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({ min: 0, max: 200 });
-  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([0, 200]);
+export function ProductFiltersComponent({
+  filters,
+  onFiltersChange,
+  className,
+}: ProductFiltersProps) {
+  const [categories, setCategories] = useState<
+    { value: ProductCategory; label: string; count: number }[]
+  >([])
+  const [brands, setBrands] = useState<
+    { value: string; label: string; count: number }[]
+  >([])
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 200,
+  })
+  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([
+    0, 200,
+  ])
 
   useEffect(() => {
     // Cargar datos para los filtros
-    setCategories(ProductService.getCategories());
-    setBrands(ProductService.getBrands());
-    const range = ProductService.getPriceRange();
-    setPriceRange(range);
-    setLocalPriceRange([filters.minPrice || range.min, filters.maxPrice || range.max]);
-  }, []);
+    setCategories(ProductService.getCategories())
+    setBrands(ProductService.getBrands())
+    const range = ProductService.getPriceRange()
+    setPriceRange(range)
+    setLocalPriceRange([
+      filters.minPrice || range.min,
+      filters.maxPrice || range.max,
+    ])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  const handleCategoryChange = (category: ProductCategory, checked: boolean) => {
+  const handleCategoryChange = (
+    category: ProductCategory,
+    checked: boolean
+  ) => {
     onFiltersChange({
       ...filters,
-      category: checked ? category : undefined
-    });
-  };
+      category: checked ? category : undefined,
+    })
+  }
 
   const handleBrandChange = (brand: string) => {
     onFiltersChange({
       ...filters,
-      brand: brand === 'all' ? undefined : brand
-    });
-  };
+      brand: brand === 'all' ? undefined : brand,
+    })
+  }
 
   const handlePriceRangeChange = (value: [number, number]) => {
-    setLocalPriceRange(value);
+    setLocalPriceRange(value)
     onFiltersChange({
       ...filters,
       minPrice: value[0],
-      maxPrice: value[1]
-    });
-  };
+      maxPrice: value[1],
+    })
+  }
 
   const handleInStockChange = (checked: boolean) => {
     onFiltersChange({
       ...filters,
-      inStock: checked ? true : undefined
-    });
-  };
+      inStock: checked ? true : undefined,
+    })
+  }
 
   const clearFilters = () => {
-    setLocalPriceRange([priceRange.min, priceRange.max]);
-    onFiltersChange({});
-  };
+    setLocalPriceRange([priceRange.min, priceRange.max])
+    onFiltersChange({})
+  }
 
   const getActiveFiltersCount = () => {
-    let count = 0;
-    if (filters.category) count++;
-    if (filters.brand) count++;
-    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count++;
-    if (filters.inStock) count++;
-    if (filters.search) count++;
-    return count;
-  };
+    let count = 0
+    if (filters.category) count++
+    if (filters.brand) count++
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined)
+      count++
+    if (filters.inStock) count++
+    if (filters.search) count++
+    return count
+  }
 
-  const activeFiltersCount = getActiveFiltersCount();
+  const activeFiltersCount = getActiveFiltersCount()
 
   return (
     <Card className={className}>
@@ -119,16 +146,18 @@ export function ProductFiltersComponent({ filters, onFiltersChange, className }:
                 <Checkbox
                   id={category.value}
                   checked={filters.category === category.value}
-                  onCheckedChange={(checked) => 
-                    handleCategoryChange(category.value, checked as boolean)
+                  onCheckedChange={(checked: boolean) =>
+                    handleCategoryChange(category.value, checked)
                   }
                 />
-                <Label 
-                  htmlFor={category.value} 
+                <Label
+                  htmlFor={category.value}
                   className="text-sm cursor-pointer flex-1 flex items-center justify-between"
                 >
                   <span>{category.label}</span>
-                  <span className="text-muted-foreground">({category.count})</span>
+                  <span className="text-muted-foreground">
+                    ({category.count})
+                  </span>
                 </Label>
               </div>
             ))}
@@ -140,8 +169,8 @@ export function ProductFiltersComponent({ filters, onFiltersChange, className }:
         {/* Marcas */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Marca</Label>
-          <Select 
-            value={filters.brand || 'all'} 
+          <Select
+            value={filters.brand || 'all'}
             onValueChange={handleBrandChange}
           >
             <SelectTrigger>
@@ -179,29 +208,33 @@ export function ProductFiltersComponent({ filters, onFiltersChange, className }:
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label htmlFor="minPrice" className="text-xs">Mínimo</Label>
+              <Label htmlFor="minPrice" className="text-xs">
+                Mínimo
+              </Label>
               <Input
                 id="minPrice"
                 type="number"
                 value={localPriceRange[0]}
                 onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setLocalPriceRange([value, localPriceRange[1]]);
-                  handlePriceRangeChange([value, localPriceRange[1]]);
+                  const value = Number(e.target.value)
+                  setLocalPriceRange([value, localPriceRange[1]])
+                  handlePriceRangeChange([value, localPriceRange[1]])
                 }}
                 className="h-8"
               />
             </div>
             <div>
-              <Label htmlFor="maxPrice" className="text-xs">Máximo</Label>
+              <Label htmlFor="maxPrice" className="text-xs">
+                Máximo
+              </Label>
               <Input
                 id="maxPrice"
                 type="number"
                 value={localPriceRange[1]}
                 onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setLocalPriceRange([localPriceRange[0], value]);
-                  handlePriceRangeChange([localPriceRange[0], value]);
+                  const value = Number(e.target.value)
+                  setLocalPriceRange([localPriceRange[0], value])
+                  handlePriceRangeChange([localPriceRange[0], value])
                 }}
                 className="h-8"
               />
@@ -235,12 +268,17 @@ export function ProductFiltersComponent({ filters, onFiltersChange, className }:
               <div className="flex flex-wrap gap-1">
                 {filters.category && (
                   <Badge variant="secondary" className="text-xs">
-                    {categories.find(c => c.value === filters.category)?.label}
+                    {
+                      categories.find((c) => c.value === filters.category)
+                        ?.label
+                    }
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-auto p-0 ml-1"
-                      onClick={() => handleCategoryChange(filters.category!, false)}
+                      onClick={() =>
+                        handleCategoryChange(filters.category!, false)
+                      }
                     >
                       <X className="h-3 w-3" />
                     </Button>
@@ -278,5 +316,5 @@ export function ProductFiltersComponent({ filters, onFiltersChange, className }:
         )}
       </CardContent>
     </Card>
-  );
+  )
 }
