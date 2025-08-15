@@ -5,22 +5,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ProductCard } from '@/components/ecommerce/product-card';
 import {
   ShoppingCart,
   Calendar,
   Heart,
-  Star,
   Truck,
   Shield,
   Clock,
   Phone,
   ArrowRight,
-  Package,
   Stethoscope,
-  Award,
-  Users
 } from 'lucide-react';
 import { Product } from '@/types';
 import { ProductService } from '@/lib/products';

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Heart, ShoppingCart, Star, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { cn } from '@/lib/utils';
