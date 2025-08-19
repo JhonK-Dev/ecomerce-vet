@@ -122,56 +122,47 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
+          {/* Título */}
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-primary mb-4">
-              Por que elegir EcommerceVet?
+            <h2 className="relative inline-block text-3xl font-bold text-primary pb-3 mb-4
+        after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-12 after:h-[3px] after:bg-blue-500 after:rounded
+        before:content-[''] before:absolute before:bottom-0 before:left-[calc(50%+30px)] before:w-2.5 before:h-[3px] before:bg-blue-700 before:rounded">
+              ¿Por qué elegir EcommerceVet?
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Ofrecemos una experiencia completa para el cuidado de tu mascota,
-              combinando productos de calidad con servicios veterinarios profesionales.
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
+              Ofrecemos una experiencia completa para el cuidado de tu mascota, combinando productos de calidad con servicios veterinarios profesionales.
             </p>
           </div>
 
+          {/* Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Truck className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-2">Envio Gratis</h3>
-              <p className="text-sm text-muted-foreground">
-                En compras mayores a S/. 150 en Lima Metropolitana
-              </p>
-            </Card>
+            {[
+              { icon: <Truck className="h-6 w-6" />, title: "Envío Gratis", desc: "En compras mayores a S/. 150 en Lima Metropolitana" },
+              { icon: <Shield className="h-6 w-6" />, title: "Productos Garantizados", desc: "Solo marcas reconocidas y productos de calidad veterinaria" },
+              { icon: <Clock className="h-6 w-6" />, title: "Atención 24/7", desc: "Emergencias veterinarias las 24 horas del día" },
+              { icon: <Stethoscope className="h-6 w-6" />, title: "Veterinarios Expertos", desc: "Equipo profesional con años de experiencia" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="relative bg-white rounded-xl p-8 overflow-hidden transition-all duration-500 group hover:rounded hover:shadow-lg"
+              >
+                {/* Círculo animado */}
+                <span className="absolute top-0 right-0 translate-x-[40%] -translate-y-[40%] w-36 h-36 bg-blue-500 border-1 border-indigo-700 rounded-full opacity-50 transition-all duration-700 group-hover:w-full group-hover:h-full group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100 group-hover:rounded-0 group-hover:rounded-xl"></span>
 
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-6 w-6 text-primary" />
+                {/* Contenido */}
+                <div className="relative z-10 text-center">
+                  <div className="w-14 h-14 bg-blue-500 rounded-md flex items-center justify-center text-white text-xl mb-6 transition-all duration-300 group-hover:bg-white group-hover:text-blue-500">
+                    {item.icon}
+                  </div>
+                  <h3 className="font-semibold text-lg mb-3 transition-colors duration-300 group-hover:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 transition-colors duration-300 group-hover:text-white">
+                    {item.desc}
+                  </p>
+                </div>
               </div>
-              <h3 className="font-semibold mb-2">Productos Garantizados</h3>
-              <p className="text-sm text-muted-foreground">
-                Solo marcas reconocidas y productos de calidad veterinaria
-              </p>
-            </Card>
-
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-2">Atencion 24/7</h3>
-              <p className="text-sm text-muted-foreground">
-                Emergencias veterinarias las 24 horas del dia
-              </p>
-            </Card>
-
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Stethoscope className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold mb-2">Veterinarios Expertos</h3>
-              <p className="text-sm text-muted-foreground">
-                Equipo profesional con anos de experiencia
-              </p>
-            </Card>
+            ))}
           </div>
         </div>
       </section>
