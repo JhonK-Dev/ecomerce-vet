@@ -1,16 +1,30 @@
 // Utilidades para integración con Clerk
 import { User } from '@/types'
 import { UserRole } from '@/types'
+export interface ClerkUser {
+  id: string;
+  emailAddresses: { emailAddress: string }[];
+  firstName?: string | null | undefined;
+  lastName?: string | null | undefined;
+  publicMetadata?: {
+    role?: UserRole;
+    address?: string;
+  };
+  imageUrl?: string;
+  phoneNumbers?: { phoneNumber: string }[];
+  createdAt: string | number | Date;
+  updatedAt: string | number | Date;
+}
 
 // Mapear usuario de Clerk a nuestro tipo User
-export function mapClerkUserToUser(clerkUser: any): User {
+export function mapClerkUserToUser(clerkUser: ClerkUser): User {
   return {
     id: clerkUser.id,
     email: clerkUser.emailAddresses[0]?.emailAddress || '',
     name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || 'Usuario',
     role: (clerkUser.publicMetadata?.role as UserRole) || UserRole.CLIENT,
     avatar: clerkUser.imageUrl,
-    phone: clerkUser.phoneNumbers[0]?.phoneNumber || undefined,
+  phone: clerkUser.phoneNumbers?.[0]?.phoneNumber || undefined,
     address: clerkUser.publicMetadata?.address as string || undefined,
     createdAt: new Date(clerkUser.createdAt),
     updatedAt: new Date(clerkUser.updatedAt)
@@ -34,7 +48,7 @@ export async function updateUserRole(userId: string, role: UserRole) {
 }
 
 // Función para verificar permisos basados en el rol de Clerk
-export function hasPermission(clerkUser: any, permission: string): boolean {
+export function hasPermission(clerkUser: ClerkUser | null | undefined, permission: string): boolean {
   if (!clerkUser) return false
 
   const role = clerkUser.publicMetadata?.role as UserRole || UserRole.CLIENT
@@ -52,6 +66,6 @@ export function hasPermission(clerkUser: any, permission: string): boolean {
 }
 
 // Función para obtener el rol del usuario
-export function getUserRole(clerkUser: any): UserRole {
+export function getUserRole(clerkUser: ClerkUser | null | undefined): UserRole {
   return (clerkUser?.publicMetadata?.role as UserRole) || UserRole.CLIENT
 }
