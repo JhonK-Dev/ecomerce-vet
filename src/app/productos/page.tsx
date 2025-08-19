@@ -1,114 +1,116 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { ProductCard } from '@/components/ecommerce/product-card';
-import { ProductFiltersComponent } from '@/components/ecommerce/product-filters';
-import { 
-  Search, 
-  Grid3X3, 
-  List, 
-  Filter,
-  SlidersHorizontal,
-  ArrowUpDown
-} from 'lucide-react';
-import { Product, ProductFilters, PaginationParams } from '@/types';
-import { ProductService } from '@/lib/products';
+import { useState, useEffect, Suspense } from 'react'
+import { useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { ProductCard } from '@/components/ecommerce/product-card'
+import { ProductFiltersComponent } from '@/components/ecommerce/product-filters'
+import { Search, Grid3X3, List, Filter, ArrowUpDown } from 'lucide-react'
+import { Product, ProductFilters, PaginationParams } from '@/types'
+import { ProductCategory } from '@/types'
+import { ProductService } from '@/lib/products'
 
-export default function ProductsPage() {
-  const searchParams = useSearchParams();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showFilters, setShowFilters] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  
+// Component that uses searchParams
+function ProductsPageContent() {
+  const searchParams = useSearchParams()
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [showFilters, setShowFilters] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+
   // Estados para filtros y paginación
-  const [filters, setFilters] = useState<ProductFilters>({});
+  const [filters, setFilters] = useState<ProductFilters>({})
   const [pagination, setPagination] = useState<PaginationParams>({
     page: 1,
     limit: 12,
     sortBy: 'name',
-    sortOrder: 'asc'
-  });
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
+    sortOrder: 'asc',
+  })
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalProducts, setTotalProducts] = useState(0)
 
   // Inicializar filtros desde URL
   useEffect(() => {
-    const initialFilters: ProductFilters = {};
-    
-    const category = searchParams.get('categoria');
-    const brand = searchParams.get('marca');
-    const search = searchParams.get('search');
-    const minPrice = searchParams.get('minPrecio');
-    const maxPrice = searchParams.get('maxPrecio');
-    
-    if (category) initialFilters.category = category as any;
-    if (brand) initialFilters.brand = brand;
+    const initialFilters: ProductFilters = {}
+
+    const category = searchParams.get('categoria')
+    const brand = searchParams.get('marca')
+    const search = searchParams.get('search')
+    const minPrice = searchParams.get('minPrecio')
+    const maxPrice = searchParams.get('maxPrecio')
+
+    if (category) initialFilters.category = category as ProductCategory
+    if (brand) initialFilters.brand = brand
     if (search) {
-      initialFilters.search = search;
-      setSearchQuery(search);
+      initialFilters.search = search
+      setSearchQuery(search)
     }
-    if (minPrice) initialFilters.minPrice = Number(minPrice);
-    if (maxPrice) initialFilters.maxPrice = Number(maxPrice);
-    
-    setFilters(initialFilters);
-  }, [searchParams]);
+    if (minPrice) initialFilters.minPrice = Number(minPrice)
+    if (maxPrice) initialFilters.maxPrice = Number(maxPrice)
+
+    setFilters(initialFilters)
+  }, [searchParams])
 
   // Cargar productos cuando cambien los filtros o paginación
-  useEffect(() => {
-    loadProducts();
-  }, [filters, pagination]);
-
-  const loadProducts = async () => {
-    setLoading(true);
+  const loadProducts = useCallback(async () => {
+    setLoading(true)
     try {
-      const response = await ProductService.getProducts(filters, pagination);
-      setProducts(response.data);
-      setTotalPages(response.pagination?.totalPages || 1);
-      setTotalProducts(response.pagination?.total || 0);
+      const response = await ProductService.getProducts(filters, pagination)
+      setProducts(response.data)
+      setTotalPages(response.pagination?.totalPages || 1)
+      setTotalProducts(response.pagination?.total || 0)
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('Error loading products:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }, [filters, pagination])
+
+  useEffect(() => {
+    loadProducts()
+  }, [loadProducts])
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFilters(prev => ({ ...prev, search: searchQuery }));
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
+    e.preventDefault()
+    setFilters((prev) => ({ ...prev, search: searchQuery }))
+    setPagination((prev) => ({ ...prev, page: 1 }))
+  }
 
   const handleSortChange = (value: string) => {
-    const [sortBy, sortOrder] = value.split('-');
-    setPagination(prev => ({
+    const [sortBy, sortOrder] = value.split('-')
+    setPagination((prev) => ({
       ...prev,
       sortBy,
       sortOrder: sortOrder as 'asc' | 'desc',
-      page: 1
-    }));
-  };
+      page: 1,
+    }))
+  }
 
   const handlePageChange = (page: number) => {
-    setPagination(prev => ({ ...prev, page }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    setPagination((prev) => ({ ...prev, page }))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleFiltersChange = (newFilters: ProductFilters) => {
-    setFilters(newFilters);
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
+    setFilters(newFilters)
+    setPagination((prev) => ({ ...prev, page: 1 }))
+  }
 
   const clearSearch = () => {
-    setSearchQuery('');
-    setFilters(prev => ({ ...prev, search: undefined }));
-  };
+    setSearchQuery('')
+    setFilters((prev) => ({ ...prev, search: undefined }))
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -154,7 +156,7 @@ export default function ProductsPage() {
               <Filter className="h-4 w-4 mr-2" />
               Filtros
             </Button>
-            
+
             <div className="text-sm text-muted-foreground">
               {totalProducts} productos encontrados
             </div>
@@ -162,7 +164,10 @@ export default function ProductsPage() {
 
           <div className="flex items-center gap-2">
             {/* Ordenamiento */}
-            <Select value={`${pagination.sortBy}-${pagination.sortOrder}`} onValueChange={handleSortChange}>
+            <Select
+              value={`${pagination.sortBy}-${pagination.sortOrder}`}
+              onValueChange={handleSortChange}
+            >
               <SelectTrigger className="w-48">
                 <ArrowUpDown className="h-4 w-4 mr-2" />
                 <SelectValue />
@@ -203,30 +208,21 @@ export default function ProductsPage() {
         {Object.keys(filters).length > 0 && (
           <div className="flex flex-wrap gap-2">
             {filters.category && (
-              <Badge variant="secondary">
-                Categoría: {filters.category}
-              </Badge>
+              <Badge variant="secondary">Categoría: {filters.category}</Badge>
             )}
             {filters.brand && (
-              <Badge variant="secondary">
-                Marca: {filters.brand}
-              </Badge>
+              <Badge variant="secondary">Marca: {filters.brand}</Badge>
             )}
             {filters.search && (
-              <Badge variant="secondary">
-                Búsqueda: "{filters.search}"
-              </Badge>
+              <Badge variant="secondary">Búsqueda: {filters.search}</Badge>
             )}
             {(filters.minPrice || filters.maxPrice) && (
               <Badge variant="secondary">
-                Precio: S/. {filters.minPrice || 0} - S/. {filters.maxPrice || '∞'}
+                Precio: S/. {filters.minPrice || 0} - S/.{' '}
+                {filters.maxPrice || '∞'}
               </Badge>
             )}
-            {filters.inStock && (
-              <Badge variant="secondary">
-                En stock
-              </Badge>
-            )}
+            {filters.inStock && <Badge variant="secondary">En stock</Badge>}
           </div>
         )}
       </div>
@@ -234,7 +230,11 @@ export default function ProductsPage() {
       {/* Contenido principal */}
       <div className="flex gap-6">
         {/* Filtros laterales */}
-        <aside className={`w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+        <aside
+          className={`w-80 flex-shrink-0 ${
+            showFilters ? 'block' : 'hidden lg:block'
+          }`}
+        >
           <ProductFiltersComponent
             filters={filters}
             onFiltersChange={handleFiltersChange}
@@ -258,11 +258,13 @@ export default function ProductsPage() {
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className={`grid gap-6 ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-                  : 'grid-cols-1'
-              }`}>
+              <div
+                className={`grid gap-6 ${
+                  viewMode === 'grid'
+                    ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                    : 'grid-cols-1'
+                }`}
+              >
                 {products.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -283,20 +285,27 @@ export default function ProductsPage() {
                     >
                       Anterior
                     </Button>
-                    
+
                     {[...Array(totalPages)].map((_, i) => {
-                      const page = i + 1;
-                      const isCurrentPage = page === pagination.page;
-                      const showPage = 
-                        page === 1 || 
-                        page === totalPages || 
-                        Math.abs(page - pagination.page) <= 2;
+                      const page = i + 1
+                      const isCurrentPage = page === pagination.page
+                      const showPage =
+                        page === 1 ||
+                        page === totalPages ||
+                        Math.abs(page - pagination.page) <= 2
 
                       if (!showPage) {
-                        if (page === pagination.page - 3 || page === pagination.page + 3) {
-                          return <span key={page} className="px-2">...</span>;
+                        if (
+                          page === pagination.page - 3 ||
+                          page === pagination.page + 3
+                        ) {
+                          return (
+                            <span key={page} className="px-2">
+                              ...
+                            </span>
+                          )
                         }
-                        return null;
+                        return null
                       }
 
                       return (
@@ -308,9 +317,9 @@ export default function ProductsPage() {
                         >
                           {page}
                         </Button>
-                      );
+                      )
                     })}
-                    
+
                     <Button
                       variant="outline"
                       onClick={() => handlePageChange(pagination.page + 1)}
@@ -325,7 +334,9 @@ export default function ProductsPage() {
           ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold mb-2">No se encontraron productos</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                No se encontraron productos
+              </h3>
               <p className="text-muted-foreground mb-4">
                 Intenta ajustar los filtros o términos de búsqueda
               </p>
@@ -337,5 +348,57 @@ export default function ProductsPage() {
         </main>
       </div>
     </div>
-  );
+  )
+}
+
+// Loading fallback component
+function ProductsPageFallback() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Productos Veterinarios</h1>
+        <p className="text-muted-foreground">
+          Encuentra todo lo que necesitas para el cuidado de tu mascota
+        </p>
+      </div>
+
+      {/* Loading skeleton */}
+      <div className="mb-6 space-y-4">
+        <div className="flex gap-2">
+          <div className="h-10 bg-muted rounded flex-1 animate-pulse"></div>
+          <div className="h-10 bg-muted rounded w-20 animate-pulse"></div>
+        </div>
+      </div>
+
+      <div className="flex gap-6">
+        <aside className="w-80 flex-shrink-0 hidden lg:block">
+          <div className="bg-muted rounded-lg h-96 animate-pulse"></div>
+        </aside>
+        <main className="flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-muted rounded-lg aspect-square mb-4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                  <div className="h-6 bg-muted rounded w-1/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      </div>
+    </div>
+  )
+}
+
+// Main page component with Suspense boundary
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsPageFallback />}>
+      <ProductsPageContent />
+    </Suspense>
+  )
 }
