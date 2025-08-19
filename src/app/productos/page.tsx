@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -20,7 +20,8 @@ import { Product, ProductFilters, PaginationParams } from '@/types'
 import { ProductCategory } from '@/types'
 import { ProductService } from '@/lib/products'
 
-export default function ProductsPage() {
+// Component that uses searchParams
+function ProductsPageContent() {
   const searchParams = useSearchParams()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -347,5 +348,57 @@ export default function ProductsPage() {
         </main>
       </div>
     </div>
+  )
+}
+
+// Loading fallback component
+function ProductsPageFallback() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Productos Veterinarios</h1>
+        <p className="text-muted-foreground">
+          Encuentra todo lo que necesitas para el cuidado de tu mascota
+        </p>
+      </div>
+
+      {/* Loading skeleton */}
+      <div className="mb-6 space-y-4">
+        <div className="flex gap-2">
+          <div className="h-10 bg-muted rounded flex-1 animate-pulse"></div>
+          <div className="h-10 bg-muted rounded w-20 animate-pulse"></div>
+        </div>
+      </div>
+
+      <div className="flex gap-6">
+        <aside className="w-80 flex-shrink-0 hidden lg:block">
+          <div className="bg-muted rounded-lg h-96 animate-pulse"></div>
+        </aside>
+        <main className="flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-muted rounded-lg aspect-square mb-4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                  <div className="h-6 bg-muted rounded w-1/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      </div>
+    </div>
+  )
+}
+
+// Main page component with Suspense boundary
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsPageFallback />}>
+      <ProductsPageContent />
+    </Suspense>
   )
 }
