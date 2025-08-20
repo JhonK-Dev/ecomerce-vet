@@ -1,135 +1,137 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+// import { Textarea } from '@/components/ui/textarea'; // Removed: module not found
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  User, 
+} from '@/components/ui/select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+// import { Calendar } from '@/components/ui/calendar'; // Removed: module not found
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  User,
   Stethoscope,
   AlertCircle,
   CheckCircle,
-  DollarSign
-} from 'lucide-react';
-import { 
-  VeterinaryService, 
-  Veterinarian, 
-  Pet, 
-  AppointmentPriority 
-} from '@/types/veterinary';
-import { VeterinarianService } from '@/lib/veterinarians';
-import { AppointmentService } from '@/lib/appointments';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+  DollarSign,
+} from 'lucide-react'
+import {
+  VeterinaryService,
+  Veterinarian,
+  AppointmentPriority,
+} from '@/types/veterinary'
+import { VeterinarianService } from '@/lib/veterinarians'
+import { AppointmentService } from '@/lib/appointments'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 interface AppointmentBookingProps {
-  service: VeterinaryService;
-  onBookingComplete?: (appointmentId: string) => void;
-  onCancel?: () => void;
+  service: VeterinaryService
+  onBookingComplete?: (appointmentId: string) => void
+  onCancel?: () => void
 }
 
-export function AppointmentBooking({ 
-  service, 
-  onBookingComplete, 
-  onCancel 
+export function AppointmentBooking({
+  service,
+  onBookingComplete,
+  onCancel,
 }: AppointmentBookingProps) {
-  const [step, setStep] = useState(1);
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [selectedVeterinarian, setSelectedVeterinarian] = useState<string>('');
-  const [selectedPet, setSelectedPet] = useState<string>('');
-  const [reason, setReason] = useState('');
-  const [symptoms, setSymptoms] = useState('');
-  const [priority, setPriority] = useState<AppointmentPriority>(AppointmentPriority.NORMAL);
-  const [notes, setNotes] = useState('');
+  const [step, setStep] = useState(1)
+  const [selectedDate, setSelectedDate] = useState<Date>()
+  const [selectedTime, setSelectedTime] = useState<string>('')
+  const [selectedVeterinarian, setSelectedVeterinarian] = useState<string>('')
+  const [selectedPet, setSelectedPet] = useState<string>('')
+  const [reason, setReason] = useState('')
+  const [symptoms, setSymptoms] = useState('')
+  const [priority, setPriority] = useState<AppointmentPriority>(
+    AppointmentPriority.NORMAL
+  )
+  const [notes, setNotes] = useState('')
 
-  const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([]);
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([])
+  const [availableSlots, setAvailableSlots] = useState<string[]>([])
+  // const [pets, setPets] = useState<Pet[]>([]); // Removed: unused
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string>('')
 
   // Cargar veterinarios al montar el componente
   useEffect(() => {
     const loadVeterinarians = async () => {
       try {
-        const allVets = await VeterinarianService.getAllVeterinarians();
+        const allVets = await VeterinarianService.getAllVeterinarians()
         // Filtrar veterinarios que pueden realizar este servicio
-        const compatibleVets = allVets.filter(vet => 
-          service.veterinarianSpecialty?.some(specialty => 
-            vet.specialties.includes(specialty)
-          ) || service.veterinarianSpecialty?.length === 0
-        );
-        setVeterinarians(compatibleVets);
-      } catch (error) {
-        setError('Error al cargar veterinarios');
+        const compatibleVets = allVets.filter(
+          (vet) =>
+            service.veterinarianSpecialty?.some((specialty) =>
+              vet.specialties.includes(specialty)
+            ) || service.veterinarianSpecialty?.length === 0
+        )
+        setVeterinarians(compatibleVets)
+      } catch {
+        setError('Error al cargar veterinarios')
       }
-    };
+    }
 
-    loadVeterinarians();
+    loadVeterinarians()
     // Aquí también cargarías las mascotas del usuario actual
     // setPets(await getUserPets());
-  }, [service]);
+  }, [service])
 
   // Cargar horarios disponibles cuando se selecciona fecha y veterinario
   useEffect(() => {
-    if (selectedDate && selectedVeterinarian) {
-      loadAvailableSlots();
+    const fetchSlots = async () => {
+      if (!selectedDate || !selectedVeterinarian) return
+      try {
+        setIsLoading(true)
+        const slots = await VeterinarianService.getAvailableSlots(
+          selectedVeterinarian,
+          selectedDate,
+          service.duration
+        )
+        setAvailableSlots(slots)
+      } catch {
+        setError('Error al cargar horarios disponibles')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [selectedDate, selectedVeterinarian]);
+    fetchSlots()
+  }, [selectedDate, selectedVeterinarian, service.duration])
 
-  const loadAvailableSlots = async () => {
-    if (!selectedDate || !selectedVeterinarian) return;
+  // Removed loadAvailableSlots, logic moved to useEffect above
 
-    try {
-      setIsLoading(true);
-      const slots = await VeterinarianService.getAvailableSlots(
-        selectedVeterinarian,
-        selectedDate,
-        service.duration
-      );
-      setAvailableSlots(slots);
-    } catch (error) {
-      setError('Error al cargar horarios disponibles');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    setSelectedTime(''); // Reset time when date changes
-  };
+  // Removed unused handleDateSelect function
 
   const handleBookAppointment = async () => {
-    if (!selectedDate || !selectedTime || !selectedVeterinarian || !selectedPet) {
-      setError('Por favor completa todos los campos requeridos');
-      return;
+    if (
+      !selectedDate ||
+      !selectedTime ||
+      !selectedVeterinarian ||
+      !selectedPet
+    ) {
+      setError('Por favor completa todos los campos requeridos')
+      return
     }
 
     try {
-      setIsLoading(true);
-      setError('');
+      setIsLoading(true)
+      setError('')
 
       // Calcular hora de fin
-      const [hours, minutes] = selectedTime.split(':').map(Number);
-      const endTime = new Date();
-      endTime.setHours(hours, minutes + service.duration);
-      const endTimeString = format(endTime, 'HH:mm');
+      const [hours, minutes] = selectedTime.split(':').map(Number)
+      const endTime = new Date()
+      endTime.setHours(hours, minutes + service.duration)
+      const endTimeString = format(endTime, 'HH:mm')
 
       const appointmentData = {
         clientId: 'current_user_id', // Obtener del contexto de usuario
@@ -139,30 +141,32 @@ export function AppointmentBooking({
         date: selectedDate,
         startTime: selectedTime,
         endTime: endTimeString,
-        status: 'scheduled' as any,
+        status: 'scheduled', // Replace with correct type if available
         priority,
         reason,
         symptoms,
         notes,
         followUpRequired: false,
         remindersSent: [],
-        paymentStatus: 'pending' as any,
-        totalCost: service.price
-      };
-
-      const newAppointment = await AppointmentService.createAppointment(appointmentData);
-      
-      if (onBookingComplete) {
-        onBookingComplete(newAppointment.id);
+        paymentStatus: 'pending', // Replace with correct type if available
+        totalCost: service.price,
       }
-      
-      setStep(4); // Mostrar confirmación
-    } catch (error) {
-      setError('Error al crear la cita. Por favor intenta nuevamente.');
+
+      const newAppointment = await AppointmentService.createAppointment(
+        appointmentData
+      )
+
+      if (onBookingComplete) {
+        onBookingComplete(newAppointment.id)
+      }
+
+      setStep(4) // Mostrar confirmación
+    } catch {
+      setError('Error al crear la cita. Por favor intenta nuevamente.')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const renderStepContent = () => {
     switch (step) {
@@ -170,12 +174,17 @@ export function AppointmentBooking({
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Seleccionar Fecha y Veterinario</h3>
-              
+              <h3 className="text-lg font-semibold mb-4">
+                Seleccionar Fecha y Veterinario
+              </h3>
+
               {/* Selección de Veterinario */}
               <div className="space-y-3 mb-6">
                 <Label>Veterinario</Label>
-                <Select value={selectedVeterinarian} onValueChange={setSelectedVeterinarian}>
+                <Select
+                  value={selectedVeterinarian}
+                  onValueChange={setSelectedVeterinarian}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona un veterinario" />
                   </SelectTrigger>
@@ -200,25 +209,32 @@ export function AppointmentBooking({
               {/* Calendario */}
               <div className="space-y-3">
                 <Label>Fecha</Label>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  disabled={(date) => date < new Date() || date.getDay() === 0} // Deshabilitar domingos y fechas pasadas
-                  locale={es}
-                  className="rounded-md border"
+                <input
+                  type="date"
+                  value={
+                    selectedDate ? selectedDate.toISOString().split('T')[0] : ''
+                  }
+                  onChange={(e) =>
+                    setSelectedDate(
+                      e.target.value ? new Date(e.target.value) : undefined
+                    )
+                  }
+                  min={new Date().toISOString().split('T')[0]}
+                  className="rounded-md border p-2"
                 />
               </div>
             </div>
           </div>
-        );
+        )
 
       case 2:
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Seleccionar Horario</h3>
-              
+              <h3 className="text-lg font-semibold mb-4">
+                Seleccionar Horario
+              </h3>
+
               {selectedDate && (
                 <div className="mb-4">
                   <Badge variant="outline" className="mb-4">
@@ -231,14 +247,16 @@ export function AppointmentBooking({
               {isLoading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  <p className="mt-2 text-muted-foreground">Cargando horarios...</p>
+                  <p className="mt-2 text-muted-foreground">
+                    Cargando horarios...
+                  </p>
                 </div>
               ) : availableSlots.length > 0 ? (
                 <div className="grid grid-cols-3 gap-3">
                   {availableSlots.map((slot) => (
                     <Button
                       key={slot}
-                      variant={selectedTime === slot ? "default" : "outline"}
+                      variant={selectedTime === slot ? 'default' : 'outline'}
                       onClick={() => setSelectedTime(slot)}
                       className="justify-center"
                     >
@@ -251,21 +269,23 @@ export function AppointmentBooking({
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    No hay horarios disponibles para la fecha seleccionada.
-                    Por favor selecciona otra fecha.
+                    No hay horarios disponibles para la fecha seleccionada. Por
+                    favor selecciona otra fecha.
                   </AlertDescription>
                 </Alert>
               )}
             </div>
           </div>
-        );
+        )
 
       case 3:
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Información de la Cita</h3>
-              
+              <h3 className="text-lg font-semibold mb-4">
+                Información de la Cita
+              </h3>
+
               {/* Selección de Mascota */}
               <div className="space-y-3 mb-6">
                 <Label>Mascota *</Label>
@@ -294,26 +314,40 @@ export function AppointmentBooking({
               {/* Síntomas */}
               <div className="space-y-3 mb-6">
                 <Label>Síntomas (opcional)</Label>
-                <Textarea
+                <textarea
                   placeholder="Describe los síntomas que has observado..."
                   value={symptoms}
                   onChange={(e) => setSymptoms(e.target.value)}
                   rows={3}
+                  className="w-full border rounded p-2"
                 />
               </div>
 
               {/* Prioridad */}
               <div className="space-y-3 mb-6">
                 <Label>Prioridad</Label>
-                <Select value={priority} onValueChange={(value) => setPriority(value as AppointmentPriority)}>
+                <Select
+                  value={priority}
+                  onValueChange={(value) =>
+                    setPriority(value as AppointmentPriority)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={AppointmentPriority.LOW}>Baja</SelectItem>
-                    <SelectItem value={AppointmentPriority.NORMAL}>Normal</SelectItem>
-                    <SelectItem value={AppointmentPriority.HIGH}>Alta</SelectItem>
-                    <SelectItem value={AppointmentPriority.EMERGENCY}>Emergencia</SelectItem>
+                    <SelectItem value={AppointmentPriority.LOW}>
+                      Baja
+                    </SelectItem>
+                    <SelectItem value={AppointmentPriority.NORMAL}>
+                      Normal
+                    </SelectItem>
+                    <SelectItem value={AppointmentPriority.HIGH}>
+                      Alta
+                    </SelectItem>
+                    <SelectItem value={AppointmentPriority.EMERGENCY}>
+                      Emergencia
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -321,16 +355,17 @@ export function AppointmentBooking({
               {/* Notas adicionales */}
               <div className="space-y-3">
                 <Label>Notas adicionales (opcional)</Label>
-                <Textarea
+                <textarea
                   placeholder="Información adicional que consideres importante..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
+                  className="w-full border rounded p-2"
                 />
               </div>
             </div>
           </div>
-        );
+        )
 
       case 4:
         return (
@@ -338,7 +373,7 @@ export function AppointmentBooking({
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            
+
             <div>
               <h3 className="text-xl font-semibold text-green-600 mb-2">
                 ¡Cita Reservada Exitosamente!
@@ -357,7 +392,8 @@ export function AppointmentBooking({
               <div className="flex justify-between">
                 <span>Fecha:</span>
                 <span className="font-medium">
-                  {selectedDate && format(selectedDate, 'EEEE, d MMMM yyyy', { locale: es })}
+                  {selectedDate &&
+                    format(selectedDate, 'EEEE, d MMMM yyyy', { locale: es })}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -370,7 +406,9 @@ export function AppointmentBooking({
               </div>
               <div className="flex justify-between">
                 <span>Costo:</span>
-                <span className="font-medium">S/. {service.price.toFixed(2)}</span>
+                <span className="font-medium">
+                  S/. {service.price.toFixed(2)}
+                </span>
               </div>
             </div>
 
@@ -378,34 +416,32 @@ export function AppointmentBooking({
               Finalizar
             </Button>
           </div>
-        );
+        )
 
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   const canProceedToNextStep = () => {
     switch (step) {
       case 1:
-        return selectedDate && selectedVeterinarian;
+        return selectedDate && selectedVeterinarian
       case 2:
-        return selectedTime;
+        return selectedTime
       case 3:
-        return selectedPet && reason.trim();
+        return selectedPet && reason.trim()
       default:
-        return false;
+        return false
     }
-  };
+  }
 
   if (step === 4) {
     return (
       <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="p-6">
-          {renderStepContent()}
-        </CardContent>
+        <CardContent className="p-6">{renderStepContent()}</CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -415,25 +451,30 @@ export function AppointmentBooking({
           <Stethoscope className="h-5 w-5" />
           Reservar Cita - {service.name}
         </CardTitle>
-        
+
         {/* Indicador de pasos */}
         <div className="flex items-center gap-2 mt-4">
           {[1, 2, 3].map((stepNumber) => (
             <div key={stepNumber} className="flex items-center">
-              <div className={`
+              <div
+                className={`
                 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                ${step >= stepNumber 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-muted text-muted-foreground'
+                ${
+                  step >= stepNumber
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 }
-              `}>
+              `}
+              >
                 {stepNumber}
               </div>
               {stepNumber < 3 && (
-                <div className={`
+                <div
+                  className={`
                   w-8 h-0.5 mx-2
                   ${step > stepNumber ? 'bg-primary' : 'bg-muted'}
-                `} />
+                `}
+                />
               )}
             </div>
           ))}
@@ -446,7 +487,9 @@ export function AppointmentBooking({
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-medium">{service.name}</h4>
-              <p className="text-sm text-muted-foreground">{service.description}</p>
+              <p className="text-sm text-muted-foreground">
+                {service.description}
+              </p>
             </div>
             <div className="text-right">
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -476,8 +519,8 @@ export function AppointmentBooking({
         <div className="flex justify-between pt-6">
           <div>
             {step > 1 && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setStep(step - 1)}
                 disabled={isLoading}
               >
@@ -485,25 +528,21 @@ export function AppointmentBooking({
               </Button>
             )}
           </div>
-          
+
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={onCancel}
-              disabled={isLoading}
-            >
+            <Button variant="outline" onClick={onCancel} disabled={isLoading}>
               Cancelar
             </Button>
-            
+
             {step < 3 ? (
-              <Button 
+              <Button
                 onClick={() => setStep(step + 1)}
                 disabled={!canProceedToNextStep() || isLoading}
               >
                 Siguiente
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={handleBookAppointment}
                 disabled={!canProceedToNextStep() || isLoading}
               >
@@ -514,5 +553,5 @@ export function AppointmentBooking({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
