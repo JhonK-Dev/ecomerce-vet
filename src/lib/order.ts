@@ -1,7 +1,23 @@
 import { Order, OrderStatus } from "@/types";
 import { EmailService } from "./email";
 
-const orders: Order[] = [];
+const STORAGE_KEY = 'ecommercevet-orders'; 
+
+function saveOrders(orders: Order[]) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+  }
+}
+
+function loadOrders(): Order[] {
+    if (typeof window !== 'undefined') {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    }
+    return [];
+}
+
+const orders: Order[] = loadOrders();
 
 export async function createOrder(orderData: Omit<Order, "id" | "createdAt" | "updatedAt" | "status">): Promise<Order> {
 
@@ -14,6 +30,7 @@ export async function createOrder(orderData: Omit<Order, "id" | "createdAt" | "u
   };
   
   orders.push(newOrder);
+    saveOrders(orders);
   
   // Enviar notificación de creación de pedido
   await EmailService.sendOrderConfirmation(newOrder);
@@ -27,6 +44,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
 
     order.status = status;
     order.updatedAt = new Date();
+    saveOrders(orders);
 
     // Enviar notificación de actualización de estado
     await EmailService.sendOrderStatusUpdate(order);
