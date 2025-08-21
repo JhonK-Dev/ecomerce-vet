@@ -6,21 +6,12 @@ import { Order, User } from '@/types/index';
 // Inicializar Resend con validación
 const apiKey = process.env.RESEND_API_KEY;
 
-console.log('🔍 Debug - API Key status:');
-console.log('- API Key exists:', !!apiKey);
-console.log('- API Key length:', apiKey?.length || 0);
-console.log('- API Key preview:', apiKey ? `${apiKey.substring(0, 10)}...` : 'undefined');
-console.log('- All env vars:', Object.keys(process.env).length);
-console.log('- All RESEND env vars:', Object.keys(process.env).filter(key => key.includes('RESEND')));
-
 // Fallback para desarrollo si no se carga desde .env.local
 const fallbackApiKey = apiKey || 're_Rddqvp2P_LktexLiVkiUQsq7QmUGMKMZ3';
 
 if (!fallbackApiKey || fallbackApiKey === 're_your_resend_api_key_here') {
   throw new Error('RESEND_API_KEY is not properly configured. Please check your .env.local file.');
 }
-
-console.log('✅ Using API Key:', fallbackApiKey.substring(0, 10) + '...');
 const resend = new Resend(fallbackApiKey);
 
 export interface EmailTemplate {
@@ -35,14 +26,8 @@ export class EmailService {
   
   // Enviar email genérico
   static async sendEmail(template: EmailTemplate): Promise<boolean> {
-    console.log('📧 EmailService.sendEmail iniciado');
-    console.log('📧 Destinatario:', template.to);
-    console.log('📧 Asunto:', template.subject);
-    console.log('📧 FROM_EMAIL:', this.FROM_EMAIL);
-    
     try {
-      console.log('📤 Enviando email con Resend...');
-      const { data, error } = await resend.emails.send({
+      const { error } = await resend.emails.send({
         from: template.from || this.FROM_EMAIL,
         to: template.to,
         subject: template.subject,
@@ -50,32 +35,25 @@ export class EmailService {
       });
 
       if (error) {
-        console.error('❌ Error enviando email:', error);
+        console.error('Error enviando email:', error);
         return false;
       }
 
-      console.log('✅ Email enviado exitosamente!');
-      console.log('📧 Datos de respuesta:', data);
       return true;
     } catch (error) {
-      console.error('💥 Error en servicio de email:', error);
+      console.error('Error en servicio de email:', error);
       return false;
     }
   }
 
   // Confirmación de cita
   static async sendAppointmentConfirmation(appointment: Appointment, userEmail: string): Promise<boolean> {
-    console.log('🏥 EmailService.sendAppointmentConfirmation iniciado');
-    console.log('🏥 Cita ID:', appointment.id);
-    console.log('🏥 Email destino:', userEmail);
-    
     const template: EmailTemplate = {
       to: userEmail,
       subject: `Confirmación de Cita - ${appointment.reason}`,
       html: this.getAppointmentConfirmationTemplate(appointment)
     };
 
-    console.log('🏥 Template creado, enviando...');
     return this.sendEmail(template);
   }
 

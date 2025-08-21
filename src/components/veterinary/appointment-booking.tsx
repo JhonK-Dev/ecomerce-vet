@@ -29,6 +29,7 @@ import {
   VeterinaryService,
   Veterinarian,
   AppointmentPriority,
+  PaymentStatus,
 } from '@/types/veterinary'
 import { VeterinarianService } from '@/lib/veterinarians'
 import { AppointmentService } from '@/lib/appointments'
@@ -148,7 +149,7 @@ export function AppointmentBooking({
         notes,
         followUpRequired: false,
         remindersSent: [],
-        paymentStatus: 'pending', // Replace with correct type if available
+        paymentStatus: PaymentStatus.PENDING, // Replace with correct type if available
         totalCost: service.price,
       }
 

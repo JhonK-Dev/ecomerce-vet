@@ -55,8 +55,7 @@ export function ProductFiltersComponent({
       filters.minPrice || range.min,
       filters.maxPrice || range.max,
     ])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [filters.minPrice, filters.maxPrice, range.min, range.max])
 
   const handleCategoryChange = (
     category: ProductCategory,

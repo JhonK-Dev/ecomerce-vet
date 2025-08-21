@@ -111,7 +111,6 @@ export class AppointmentService {
           appointments.push(newAppointment);
           
           // Enviar confirmación automática
-          console.log('🚀 Iniciando envío de confirmación automática...');
           this.sendConfirmationNotification(newAppointment);
           
           resolve(newAppointment);
@@ -409,17 +408,11 @@ export class AppointmentService {
 
   // Enviar notificaciones (usando API route del servidor)
   private static async sendConfirmationNotification(appointment: Appointment): Promise<void> {
-    console.log('🔔 Enviando notificación de confirmación para cita:', appointment.id);
-    console.log('📧 Buscando usuario con ID:', appointment.clientId);
-    
     const user = AuthService.getUserById(appointment.clientId);
-    console.log('👤 Usuario encontrado:', user ? user.email : 'No encontrado');
-    
     const userEmail = user ? user.email : 'delivered@resend.dev';
-    console.log('📤 Enviando email de confirmación a:', userEmail);
 
     try {
-      const response = await fetch('/api/send-appointment-email', {
+      await fetch('/api/send-appointment-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -430,12 +423,8 @@ export class AppointmentService {
           type: 'confirmation'
         }),
       });
-
-      const result = await response.json();
-      console.log('✅ Respuesta del servidor:', result.success ? 'Exitoso' : 'Falló');
-      console.log('📧 Mensaje:', result.message);
     } catch (error) {
-      console.error('💥 Error enviando email:', error);
+      console.error('Error enviando email:', error);
     }
   }
 

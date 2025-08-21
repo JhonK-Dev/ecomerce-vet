@@ -1,47 +1,48 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { X, Filter, RotateCcw } from 'lucide-react';
-import { ServiceCategory, VeterinarianSpecialty, ServiceFilters } from '@/types/veterinary';
-import { VeterinaryServiceService } from '@/lib/veterinary-services';
+} from '@/components/ui/select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { Slider } from '@/components/ui/slider'
+import { X, Filter, RotateCcw } from 'lucide-react'
+import type { ServiceFilters } from '@/types/veterinary'
+import { VeterinarianSpecialty } from '@/types/veterinary'
+import { VeterinaryServiceService } from '@/lib/veterinary-services'
 
 interface ServiceFiltersProps {
-  filters: ServiceFilters;
-  onFiltersChange: (filters: ServiceFilters) => void;
-  className?: string;
+  filters: ServiceFilters
+  onFiltersChange: (filters: ServiceFilters) => void
+  className?: string
 }
 
-export function ServiceFiltersComponent({
+export function ServiceFilters({
   filters,
   onFiltersChange,
-  className
+  className,
 }: ServiceFiltersProps) {
   const [priceRange, setPriceRange] = useState<number[]>([
     filters.priceMin || 0,
-    filters.priceMax || 500
-  ]);
+    filters.priceMax || 500,
+  ])
 
   const [durationRange, setDurationRange] = useState<number[]>([
     filters.durationMin || 0,
-    filters.durationMax || 180
-  ]);
+    filters.durationMax || 180,
+  ])
 
-  const categories = VeterinaryServiceService.getServiceCategories();
+  const categories = VeterinaryServiceService.getServiceCategories()
 
   const specialties = [
     { value: VeterinarianSpecialty.GENERAL, label: 'General' },
@@ -51,49 +52,54 @@ export function ServiceFiltersComponent({
     { value: VeterinarianSpecialty.ONCOLOGY, label: 'Oncología' },
     { value: VeterinarianSpecialty.OPHTHALMOLOGY, label: 'Oftalmología' },
     { value: VeterinarianSpecialty.ORTHOPEDICS, label: 'Ortopedia' },
-    { value: VeterinarianSpecialty.EXOTIC_ANIMALS, label: 'Animales Exóticos' }
-  ];
+    { value: VeterinarianSpecialty.EXOTIC_ANIMALS, label: 'Animales Exóticos' },
+  ]
 
-  const handleFilterChange = (key: keyof ServiceFilters, value: any) => {
+  const handleFilterChange = (
+    key: keyof ServiceFilters,
+    value: ServiceFilters[keyof ServiceFilters]
+  ) => {
     onFiltersChange({
       ...filters,
-      [key]: value
-    });
-  };
+      [key]: value,
+    })
+  }
 
   const handlePriceRangeChange = (values: number[]) => {
-    setPriceRange(values);
+    setPriceRange(values)
     onFiltersChange({
       ...filters,
       priceMin: values[0],
-      priceMax: values[1]
-    });
-  };
+      priceMax: values[1],
+    })
+  }
 
   const handleDurationRangeChange = (values: number[]) => {
-    setDurationRange(values);
+    setDurationRange(values)
     onFiltersChange({
       ...filters,
       durationMin: values[0],
-      durationMax: values[1]
-    });
-  };
+      durationMax: values[1],
+    })
+  }
 
   const clearFilters = () => {
-    setPriceRange([0, 500]);
-    setDurationRange([0, 180]);
-    onFiltersChange({});
-  };
+    setPriceRange([0, 500])
+    setDurationRange([0, 180])
+    onFiltersChange({})
+  }
 
   const getActiveFiltersCount = () => {
-    let count = 0;
-    if (filters.category) count++;
-    if (filters.veterinarianSpecialty) count++;
-    if (filters.priceMin !== undefined || filters.priceMax !== undefined) count++;
-    if (filters.durationMin !== undefined || filters.durationMax !== undefined) count++;
-    if (filters.search) count++;
-    return count;
-  };
+    let count = 0
+    if (filters.category) count++
+    if (filters.veterinarianSpecialty) count++
+    if (filters.priceMin !== undefined || filters.priceMax !== undefined)
+      count++
+    if (filters.durationMin !== undefined || filters.durationMax !== undefined)
+      count++
+    if (filters.search) count++
+    return count
+  }
 
   return (
     <Card className={className}>
@@ -103,9 +109,7 @@ export function ServiceFiltersComponent({
             <Filter className="h-5 w-5" />
             Filtros
             {getActiveFiltersCount() > 0 && (
-              <Badge variant="secondary">
-                {getActiveFiltersCount()}
-              </Badge>
+              <Badge variant="secondary">{getActiveFiltersCount()}</Badge>
             )}
           </CardTitle>
           <Button
@@ -139,7 +143,7 @@ export function ServiceFiltersComponent({
           <Label>Categoría</Label>
           <Select
             value={filters.category || ''}
-            onValueChange={(value) => 
+            onValueChange={(value) =>
               handleFilterChange('category', value || undefined)
             }
           >
@@ -164,7 +168,7 @@ export function ServiceFiltersComponent({
           <Label>Especialidad Requerida</Label>
           <Select
             value={filters.veterinarianSpecialty || ''}
-            onValueChange={(value) => 
+            onValueChange={(value) =>
               handleFilterChange('veterinarianSpecialty', value || undefined)
             }
           >
@@ -229,7 +233,7 @@ export function ServiceFiltersComponent({
           <Checkbox
             id="active-only"
             checked={filters.isActive !== false}
-            onCheckedChange={(checked) => 
+            onCheckedChange={(checked) =>
               handleFilterChange('isActive', checked ? undefined : false)
             }
           />
@@ -246,44 +250,67 @@ export function ServiceFiltersComponent({
               <Label className="text-sm font-medium">Filtros Activos</Label>
               <div className="flex flex-wrap gap-2">
                 {filters.category && (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    {categories.find(c => c.value === filters.category)?.label}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {
+                      categories.find((c) => c.value === filters.category)
+                        ?.label
+                    }
+                    <X
+                      className="h-3 w-3 cursor-pointer"
                       onClick={() => handleFilterChange('category', undefined)}
                     />
                   </Badge>
                 )}
-                
+
                 {filters.veterinarianSpecialty && (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    {specialties.find(s => s.value === filters.veterinarianSpecialty)?.label}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
-                      onClick={() => handleFilterChange('veterinarianSpecialty', undefined)}
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {
+                      specialties.find(
+                        (s) => s.value === filters.veterinarianSpecialty
+                      )?.label
+                    }
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() =>
+                        handleFilterChange('veterinarianSpecialty', undefined)
+                      }
                     />
                   </Badge>
                 )}
 
-                {(filters.priceMin !== undefined || filters.priceMax !== undefined) && (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    Precio: S/. {filters.priceMin || 0} - S/. {filters.priceMax || 500}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
+                {(filters.priceMin !== undefined ||
+                  filters.priceMax !== undefined) && (
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    Precio: S/. {filters.priceMin || 0} - S/.{' '}
+                    {filters.priceMax || 500}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
                       onClick={() => {
-                        handleFilterChange('priceMin', undefined);
-                        handleFilterChange('priceMax', undefined);
-                        setPriceRange([0, 500]);
+                        handleFilterChange('priceMin', undefined)
+                        handleFilterChange('priceMax', undefined)
+                        setPriceRange([0, 500])
                       }}
                     />
                   </Badge>
                 )}
 
                 {filters.search && (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    "{filters.search}"
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {'{filters.search}'}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
                       onClick={() => handleFilterChange('search', undefined)}
                     />
                   </Badge>
@@ -294,5 +321,5 @@ export function ServiceFiltersComponent({
         )}
       </CardContent>
     </Card>
-  );
+  )
 }

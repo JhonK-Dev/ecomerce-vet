@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { EmailService } from '@/lib/email';
-import { Appointment } from '@/types/veterinary';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,9 +12,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🔔 API: Enviando email de tipo:', type);
-    console.log('📧 API: Email destino:', userEmail);
-    console.log('🏥 API: Cita ID:', appointment.id);
 
     let success = false;
 
@@ -51,7 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('💥 Error en API send-appointment-email:', error);
+    console.error('Error en API send-appointment-email:', error);
     return NextResponse.json(
       { 
         success: false, 
