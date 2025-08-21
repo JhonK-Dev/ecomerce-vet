@@ -195,6 +195,14 @@ export enum ReminderType {
   PUSH = 'push'
 }
 
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  PARTIAL = 'partial',
+  CANCELLED = 'cancelled',
+  REFUNDED = 'refunded'
+}
+
 export interface AppointmentSlot {
   date: Date;
   startTime: string;

@@ -3,8 +3,25 @@ import { Resend } from 'resend';
 import { Appointment } from '@/types/veterinary';
 import { Order, User } from '@/types/index';
 
-// Inicializar Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inicializar Resend con validación
+const apiKey = process.env.RESEND_API_KEY;
+
+console.log('🔍 Debug - API Key status:');
+console.log('- API Key exists:', !!apiKey);
+console.log('- API Key length:', apiKey?.length || 0);
+console.log('- API Key preview:', apiKey ? `${apiKey.substring(0, 10)}...` : 'undefined');
+console.log('- All env vars:', Object.keys(process.env).length);
+console.log('- All RESEND env vars:', Object.keys(process.env).filter(key => key.includes('RESEND')));
+
+// Fallback para desarrollo si no se carga desde .env.local
+const fallbackApiKey = apiKey || 're_Rddqvp2P_LktexLiVkiUQsq7QmUGMKMZ3';
+
+if (!fallbackApiKey || fallbackApiKey === 're_your_resend_api_key_here') {
+  throw new Error('RESEND_API_KEY is not properly configured. Please check your .env.local file.');
+}
+
+console.log('✅ Using API Key:', fallbackApiKey.substring(0, 10) + '...');
+const resend = new Resend(fallbackApiKey);
 
 export interface EmailTemplate {
   to: string;
@@ -18,7 +35,13 @@ export class EmailService {
   
   // Enviar email genérico
   static async sendEmail(template: EmailTemplate): Promise<boolean> {
+    console.log('📧 EmailService.sendEmail iniciado');
+    console.log('📧 Destinatario:', template.to);
+    console.log('📧 Asunto:', template.subject);
+    console.log('📧 FROM_EMAIL:', this.FROM_EMAIL);
+    
     try {
+      console.log('📤 Enviando email con Resend...');
       const { data, error } = await resend.emails.send({
         from: template.from || this.FROM_EMAIL,
         to: template.to,
@@ -27,26 +50,32 @@ export class EmailService {
       });
 
       if (error) {
-        console.error('Error enviando email:', error);
+        console.error('❌ Error enviando email:', error);
         return false;
       }
 
-      console.log('Email enviado exitosamente:', data);
+      console.log('✅ Email enviado exitosamente!');
+      console.log('📧 Datos de respuesta:', data);
       return true;
     } catch (error) {
-      console.error('Error en servicio de email:', error);
+      console.error('💥 Error en servicio de email:', error);
       return false;
     }
   }
 
   // Confirmación de cita
   static async sendAppointmentConfirmation(appointment: Appointment, userEmail: string): Promise<boolean> {
+    console.log('🏥 EmailService.sendAppointmentConfirmation iniciado');
+    console.log('🏥 Cita ID:', appointment.id);
+    console.log('🏥 Email destino:', userEmail);
+    
     const template: EmailTemplate = {
       to: userEmail,
-      subject: `Confirmación de Cita - ${appointment.service.name}`,
+      subject: `Confirmación de Cita - ${appointment.reason}`,
       html: this.getAppointmentConfirmationTemplate(appointment)
     };
 
+    console.log('🏥 Template creado, enviando...');
     return this.sendEmail(template);
   }
 
@@ -54,7 +83,7 @@ export class EmailService {
   static async sendAppointmentReminder(appointment: Appointment, userEmail: string): Promise<boolean> {
     const template: EmailTemplate = {
       to: userEmail,
-      subject: `Recordatorio: Cita mañana - ${appointment.service.name}`,
+      subject: `Recordatorio: Cita mañana - ${appointment.reason}`,
       html: this.getAppointmentReminderTemplate(appointment)
     };
 
@@ -65,7 +94,7 @@ export class EmailService {
   static async sendAppointmentCancellation(appointment: Appointment, userEmail: string): Promise<boolean> {
     const template: EmailTemplate = {
       to: userEmail,
-      subject: `Cita Cancelada - ${appointment.service.name}`,
+      subject: `Cita Cancelada - ${appointment.reason}`,
       html: this.getAppointmentCancellationTemplate(appointment)
     };
 
@@ -142,8 +171,8 @@ export class EmailService {
               <div class="appointment-details">
                 <h3>Detalles de la Cita</h3>
                 <div class="detail-row">
-                  <strong>Servicio:</strong>
-                  <span>${appointment.service.name}</span>
+                  <strong>Motivo:</strong>
+                  <span>${appointment.reason}</span>
                 </div>
                 <div class="detail-row">
                   <strong>Fecha:</strong>
@@ -151,19 +180,19 @@ export class EmailService {
                 </div>
                 <div class="detail-row">
                   <strong>Hora:</strong>
-                  <span>${appointment.time}</span>
+                  <span>${appointment.startTime} - ${appointment.endTime}</span>
                 </div>
                 <div class="detail-row">
-                  <strong>Veterinario:</strong>
-                  <span>Dr. ${appointment.veterinarian.name}</span>
+                  <strong>ID Veterinario:</strong>
+                  <span>${appointment.veterinarianId}</span>
                 </div>
                 <div class="detail-row">
-                  <strong>Mascota:</strong>
-                  <span>${appointment.pet.name} (${appointment.pet.species})</span>
+                  <strong>Estado:</strong>
+                  <span>${appointment.status}</span>
                 </div>
                 <div class="detail-row">
-                  <strong>Precio:</strong>
-                  <span>$${appointment.service.price.toLocaleString()}</span>
+                  <strong>Costo Total:</strong>
+                  <span>$${appointment.totalCost?.toLocaleString() || 'Por determinar'}</span>
                 </div>
               </div>
 
@@ -171,6 +200,13 @@ export class EmailService {
                 <div class="appointment-details">
                   <h3>Notas Adicionales</h3>
                   <p>${appointment.notes}</p>
+                </div>
+              ` : ''}
+
+              ${appointment.symptoms ? `
+                <div class="appointment-details">
+                  <h3>Síntomas Reportados</h3>
+                  <p>${appointment.symptoms}</p>
                 </div>
               ` : ''}
 
@@ -229,8 +265,8 @@ export class EmailService {
               <div class="appointment-details">
                 <h3>Detalles de tu Cita</h3>
                 <div class="detail-row">
-                  <strong>Servicio:</strong>
-                  <span>${appointment.service.name}</span>
+                  <strong>Motivo:</strong>
+                  <span>${appointment.reason}</span>
                 </div>
                 <div class="detail-row">
                   <strong>Fecha:</strong>
@@ -238,15 +274,15 @@ export class EmailService {
                 </div>
                 <div class="detail-row">
                   <strong>Hora:</strong>
-                  <span>${appointment.time}</span>
+                  <span>${appointment.startTime} - ${appointment.endTime}</span>
                 </div>
                 <div class="detail-row">
-                  <strong>Veterinario:</strong>
-                  <span>Dr. ${appointment.veterinarian.name}</span>
+                  <strong>ID Veterinario:</strong>
+                  <span>${appointment.veterinarianId}</span>
                 </div>
                 <div class="detail-row">
-                  <strong>Mascota:</strong>
-                  <span>${appointment.pet.name}</span>
+                  <strong>Estado:</strong>
+                  <span>${appointment.status}</span>
                 </div>
               </div>
 
@@ -296,10 +332,11 @@ export class EmailService {
               
               <div class="appointment-details">
                 <h3>Detalles de la Cita Cancelada</h3>
-                <p><strong>Servicio:</strong> ${appointment.service.name}</p>
+                <p><strong>Motivo:</strong> ${appointment.reason}</p>
                 <p><strong>Fecha:</strong> ${new Date(appointment.date).toLocaleDateString('es-ES')}</p>
-                <p><strong>Hora:</strong> ${appointment.time}</p>
-                <p><strong>Veterinario:</strong> Dr. ${appointment.veterinarian.name}</p>
+                <p><strong>Hora:</strong> ${appointment.startTime} - ${appointment.endTime}</p>
+                <p><strong>ID Veterinario:</strong> ${appointment.veterinarianId}</p>
+                <p><strong>Estado:</strong> ${appointment.status}</p>
               </div>
 
               <p>Si necesitas reagendar, puedes hacerlo en cualquier momento.</p>
