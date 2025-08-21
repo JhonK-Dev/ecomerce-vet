@@ -150,6 +150,11 @@ export class AuthService {
     return newUser;
   }
 
+  // Obtener usuario por ID
+  static getUserById(userId: string): User | undefined {
+    return users.find(u => u.id === userId);
+  }
+
   // Actualizar perfil
   static async updateProfile(userId: string, updates: Partial<User>): Promise<User | null> {
     const userIndex = users.findIndex(u => u.id === userId);
