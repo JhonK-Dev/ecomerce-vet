@@ -9,9 +9,7 @@ import {
   PaymentStatus
 } from '@/types/veterinary';
 import { VeterinarianService } from './veterinarians';
-import { VeterinaryServiceService } from './veterinary-services';
 import { AuthService } from './auth';
-import { EmailService } from './email';
 
 // Datos simulados de citas
 const appointments: Appointment[] = [
@@ -335,12 +333,8 @@ export class AppointmentService {
           serviceDuration
         );
 
-        // Obtener citas existentes para esa fecha
-        const existingAppointments = await this.getAppointments({
-          veterinarianId,
-          dateFrom: date,
-          dateTo: date
-        });
+        // No necesitamos obtener las citas existentes porque usamos hasTimeConflict directamente
+        // que ya tiene esa lógica implementada internamente
 
         const slots: AppointmentSlot[] = availableTimeSlots.map(startTime => {
           const endTime = this.addMinutesToTime(startTime, serviceDuration);
@@ -356,7 +350,8 @@ export class AppointmentService {
         });
 
         resolve(slots);
-      } catch (error) {
+      } catch (err) {
+        console.error('Error al obtener slots disponibles:', err);
         resolve([]);
       }
     });
@@ -406,33 +401,70 @@ export class AppointmentService {
     });
   }
 
-  // Enviar notificaciones (simulado)
+  // Enviar notificaciones (usando API route del servidor)
   private static async sendConfirmationNotification(appointment: Appointment): Promise<void> {
     const user = AuthService.getUserById(appointment.clientId);
-    if (user) {
-      await EmailService.sendAppointmentConfirmation(appointment, user.email);
+    const userEmail = user ? user.email : 'delivered@resend.dev';
+
+    try {
+      await fetch('/api/send-appointment-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          appointment,
+          userEmail,
+          type: 'confirmation'
+        }),
+      });
+    } catch (error) {
+      console.error('Error enviando email:', error);
     }
-    // Aquí se integraría con servicios de email/SMS/WhatsApp
   }
 
   private static async sendStatusChangeNotification(appointment: Appointment): Promise<void> {
     const user = AuthService.getUserById(appointment.clientId);
-    if (user) {
-      await EmailService.sendAppointmentReminder(appointment, user.email);
+    const userEmail = user ? user.email : 'delivered@resend.dev';
+    
+    try {
+      await fetch('/api/send-appointment-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointment, userEmail, type: 'reminder' }),
+      });
+    } catch (error) {
+      console.error('Error enviando notificación de cambio de estado:', error);
     }
   }
 
   private static async sendRescheduleNotification(appointment: Appointment): Promise<void> {
     const user = AuthService.getUserById(appointment.clientId);
-    if (user) {
-      await EmailService.sendAppointmentReminder(appointment, user.email);
+    const userEmail = user ? user.email : 'delivered@resend.dev';
+    
+    try {
+      await fetch('/api/send-appointment-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointment, userEmail, type: 'reminder' }),
+      });
+    } catch (error) {
+      console.error('Error enviando notificación de reprogramación:', error);
     }
   }
 
   private static async sendCancellationNotification(appointment: Appointment): Promise<void> {
     const user = AuthService.getUserById(appointment.clientId);
-    if (user) {
-      await EmailService.sendAppointmentCancellation(appointment, user.email);
+    const userEmail = user ? user.email : 'delivered@resend.dev';
+    
+    try {
+      await fetch('/api/send-appointment-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointment, userEmail, type: 'cancellation' }),
+      });
+    } catch (error) {
+      console.error('Error enviando notificación de cancelación:', error);
     }
   }
 

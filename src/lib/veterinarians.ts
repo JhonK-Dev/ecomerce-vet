@@ -2,8 +2,7 @@
 import { 
   Veterinarian, 
   VeterinarianSpecialty, 
-  WorkingHours, 
-  DaySchedule 
+  WorkingHours
 } from '@/types/veterinary';
 
 // Horario de trabajo por defecto
@@ -162,7 +161,7 @@ export class VeterinarianService {
   static async getAvailableVeterinarians(date: Date): Promise<Veterinarian[]> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const dayOfWeek = date.toLocaleLowerCase().slice(0, 3) as keyof WorkingHours;
+        const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof WorkingHours;
         const availableVets = veterinarians.filter(vet => {
           if (!vet.isActive) return false;
           const daySchedule = vet.workingHours[dayOfWeek];

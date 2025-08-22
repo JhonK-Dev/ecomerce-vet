@@ -195,6 +195,14 @@ export enum ReminderType {
   PUSH = 'push'
 }
 
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  PARTIAL = 'partial',
+  CANCELLED = 'cancelled',
+  REFUNDED = 'refunded'
+}
+
 export interface AppointmentSlot {
   date: Date;
   startTime: string;
@@ -237,6 +245,11 @@ export interface ServiceFilters {
   durationMax?: number;
   isActive?: boolean;
   search?: string;
+}
+
+export interface PaginationParams {
+  page: number;
+  limit: number;
 }
 
 // Notificaciones y recordatorios
