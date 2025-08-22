@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ServiceCard } from './service-card'
 import { ServiceFilters } from './service-filters'
 import { Button } from '@/components/ui/button'
@@ -73,10 +73,6 @@ export function ServicesList({
     }
   }, [initialServices])
 
-  useEffect(() => {
-    applyFiltersAndSort()
-  }, [services, filters, searchTerm, sortBy, sortDirection])
-
   const loadServices = async () => {
     try {
       setIsLoading(true)
@@ -91,7 +87,7 @@ export function ServicesList({
     }
   }
 
-  const applyFiltersAndSort = () => {
+  const applyFiltersAndSort = useCallback(() => {
     let filtered = [...services]
 
     // Filtro por término de búsqueda
@@ -162,7 +158,12 @@ export function ServicesList({
     })
 
     setFilteredServices(filtered)
-  }
+  }, [services, filters, searchTerm, sortBy, sortDirection])
+
+  // Ejecutar la función cuando cambien las dependencias
+  useEffect(() => {
+    applyFiltersAndSort()
+  }, [applyFiltersAndSort])
 
   const handleFiltersChange = (newFilters: ServiceFiltersType) => {
     setFilters(newFilters)

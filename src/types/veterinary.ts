@@ -247,6 +247,11 @@ export interface ServiceFilters {
   search?: string;
 }
 
+export interface PaginationParams {
+  page: number;
+  limit: number;
+}
+
 // Notificaciones y recordatorios
 export interface NotificationTemplate {
   id: string;

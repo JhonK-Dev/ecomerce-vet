@@ -55,7 +55,7 @@ export function ProductFiltersComponent({
       filters.minPrice || range.min,
       filters.maxPrice || range.max,
     ])
-  }, [filters.minPrice, filters.maxPrice, range.min, range.max])
+  }, [filters.minPrice, filters.maxPrice])
 
   const handleCategoryChange = (
     category: ProductCategory,

@@ -9,9 +9,7 @@ import {
   PaymentStatus
 } from '@/types/veterinary';
 import { VeterinarianService } from './veterinarians';
-import { VeterinaryServiceService } from './veterinary-services';
 import { AuthService } from './auth';
-import { EmailService } from './email';
 
 // Datos simulados de citas
 const appointments: Appointment[] = [
@@ -335,12 +333,8 @@ export class AppointmentService {
           serviceDuration
         );
 
-        // Obtener citas existentes para esa fecha
-        const existingAppointments = await this.getAppointments({
-          veterinarianId,
-          dateFrom: date,
-          dateTo: date
-        });
+        // No necesitamos obtener las citas existentes porque usamos hasTimeConflict directamente
+        // que ya tiene esa lógica implementada internamente
 
         const slots: AppointmentSlot[] = availableTimeSlots.map(startTime => {
           const endTime = this.addMinutesToTime(startTime, serviceDuration);
@@ -356,7 +350,8 @@ export class AppointmentService {
         });
 
         resolve(slots);
-      } catch (error) {
+      } catch (err) {
+        console.error('Error al obtener slots disponibles:', err);
         resolve([]);
       }
     });

@@ -162,7 +162,9 @@ export function AppointmentCalendar({
     return labels[status] || status
   }
 
-  const handleDateSelect = (value: Date | Date[]) => {
+  const handleDateSelect = (value: Date | Date[] | null) => {
+    if (!value) return
+
     const date = Array.isArray(value) ? value[0] : value
     if (date instanceof Date) {
       setSelectedDate(date)
@@ -456,8 +458,9 @@ export function AppointmentCalendar({
             {viewMode === 'month' && (
               <Calendar
                 value={selectedDate}
+                // @ts-expect-error - El tipo de onChange de react-calendar es complejo
                 onChange={handleDateSelect}
-                locale={'es-ES'}
+                locale="es-ES"
                 className="rounded-md border"
               />
             )}
