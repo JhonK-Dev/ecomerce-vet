@@ -69,3 +69,33 @@ export function hasPermission(clerkUser: ClerkUser | null | undefined, permissio
 export function getUserRole(clerkUser: ClerkUser | null | undefined): UserRole {
   return (clerkUser?.publicMetadata?.role as UserRole) || UserRole.CLIENT
 }
+
+// Funciones adicionales para el módulo de historias clínicas
+export function canAccessMedicalRecords(clerkUser: ClerkUser | null | undefined): boolean {
+  // Todos los usuarios autenticados pueden acceder a historias clínicas
+  return clerkUser !== null && clerkUser !== undefined
+}
+
+export function canEditMedicalRecords(clerkUser: ClerkUser | null | undefined): boolean {
+  // Solo veterinarios y admins pueden editar registros médicos
+  const role = getUserRole(clerkUser)
+  return role === UserRole.ADMIN || role === UserRole.VETERINARIAN
+}
+
+export function canManagePets(clerkUser: ClerkUser | null | undefined): boolean {
+  // Todos los usuarios autenticados pueden gestionar mascotas
+  // Los clientes solo sus mascotas, veterinarios y admins todas
+  return clerkUser !== null && clerkUser !== undefined
+}
+
+export function isAdmin(clerkUser: ClerkUser | null | undefined): boolean {
+  return getUserRole(clerkUser) === UserRole.ADMIN
+}
+
+export function isVeterinarian(clerkUser: ClerkUser | null | undefined): boolean {
+  return getUserRole(clerkUser) === UserRole.VETERINARIAN
+}
+
+export function isClient(clerkUser: ClerkUser | null | undefined): boolean {
+  return getUserRole(clerkUser) === UserRole.CLIENT
+}

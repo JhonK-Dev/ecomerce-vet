@@ -20,7 +20,8 @@ import {
   ShoppingCart, 
   Heart, 
   Menu,
-  Stethoscope
+  Stethoscope,
+  User
 } from 'lucide-react';
 import { CartService } from '@/lib/cart';
 import { ProductCategory } from '@/types';
@@ -106,6 +107,14 @@ export function Header() {
                   </Link>
                 </NavigationMenuItem>
 
+                <NavigationMenuItem>
+                  <Link href="/historias-clinicas" legacyBehavior passHref>
+                    <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                      Historias Clínicas
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+
               </NavigationMenuList>
             </NavigationMenu>
           </div>
@@ -150,6 +159,15 @@ export function Header() {
 
             {/* User Menu with Clerk */}
             <UserButton />
+
+            {/* Configuración de rol (solo en desarrollo) */}
+            {process.env.NODE_ENV === 'development' && (
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/configurar-rol" title="Configurar Rol">
+                  <User className="h-5 w-5" />
+                </Link>
+              </Button>
+            )}
 
             {/* Mobile menu */}
             <Button variant="ghost" size="icon" className="md:hidden">
