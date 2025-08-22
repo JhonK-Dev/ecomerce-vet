@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
@@ -15,7 +15,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import {
-  AlertTriangle,
   Calendar,
   CheckCircle,
   Clock,
@@ -23,15 +22,13 @@ import {
   Syringe,
   Pill,
   Heart,
-  Plus,
-  X,
-  Check
+  Check,
 } from 'lucide-react'
-import { 
-  MedicalAlert, 
-  AlertType, 
+import {
+  MedicalAlert,
+  AlertType,
   AlertPriority,
-  Pet 
+  Pet,
 } from '@/types/medical-records'
 import { MedicalRecordService } from '@/lib/medical-records'
 import { cn } from '@/lib/utils'
@@ -51,18 +48,13 @@ export function MedicalAlerts({
   showCompleted = false,
   maxItems,
   onAlertComplete,
-  className
+  className,
 }: MedicalAlertsProps) {
   const [alerts, setAlerts] = useState<MedicalAlert[]>([])
   const [pets, setPets] = useState<Pet[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedAlert, setSelectedAlert] = useState<MedicalAlert | null>(null)
 
-  useEffect(() => {
-    loadAlerts()
-  }, [petId, ownerId])
-
-  const loadAlerts = async () => {
+  const loadAlerts = useCallback(async () => {
     try {
       setLoading(true)
       let alertsData: MedicalAlert[] = []
@@ -82,7 +74,7 @@ export function MedicalAlerts({
 
       // Filtrar alertas completadas si no se deben mostrar
       if (!showCompleted) {
-        alertsData = alertsData.filter(alert => !alert.isCompleted)
+        alertsData = alertsData.filter((alert) => !alert.isCompleted)
       }
 
       // Limitar número de elementos si se especifica
@@ -97,15 +89,19 @@ export function MedicalAlerts({
     } finally {
       setLoading(false)
     }
-  }
+  }, [petId, ownerId, showCompleted, maxItems])
+
+  useEffect(() => {
+    loadAlerts()
+  }, [loadAlerts])
 
   const handleCompleteAlert = async (alert: MedicalAlert) => {
     try {
       const updatedAlert = await MedicalRecordService.completeAlert(alert.id)
       if (updatedAlert) {
-        setAlerts(prev => prev.map(a => 
-          a.id === alert.id ? updatedAlert : a
-        ))
+        setAlerts((prev) =>
+          prev.map((a) => (a.id === alert.id ? updatedAlert : a))
+        )
         onAlertComplete?.(updatedAlert)
       }
     } catch (error) {
@@ -118,38 +114,38 @@ export function MedicalAlerts({
       [AlertType.VACCINATION_DUE]: {
         label: 'Vacuna Pendiente',
         icon: Syringe,
-        color: 'text-green-600'
+        color: 'text-green-600',
       },
       [AlertType.MEDICATION_REMINDER]: {
         label: 'Medicamento',
         icon: Pill,
-        color: 'text-blue-600'
+        color: 'text-blue-600',
       },
       [AlertType.FOLLOW_UP_APPOINTMENT]: {
         label: 'Seguimiento',
         icon: Calendar,
-        color: 'text-purple-600'
+        color: 'text-purple-600',
       },
       [AlertType.ANNUAL_CHECKUP]: {
         label: 'Chequeo Anual',
         icon: Heart,
-        color: 'text-red-600'
+        color: 'text-red-600',
       },
       [AlertType.DENTAL_CLEANING]: {
         label: 'Limpieza Dental',
         icon: Heart,
-        color: 'text-orange-600'
+        color: 'text-orange-600',
       },
       [AlertType.WEIGHT_CHECK]: {
         label: 'Control de Peso',
         icon: Heart,
-        color: 'text-indigo-600'
+        color: 'text-indigo-600',
       },
       [AlertType.CUSTOM]: {
         label: 'Personalizado',
         icon: Bell,
-        color: 'text-gray-600'
-      }
+        color: 'text-gray-600',
+      },
     }
     return typeMap[type]
   }
@@ -158,20 +154,20 @@ export function MedicalAlerts({
     const priorityMap = {
       [AlertPriority.LOW]: {
         label: 'Baja',
-        color: 'bg-green-100 text-green-800 border-green-200'
+        color: 'bg-green-100 text-green-800 border-green-200',
       },
       [AlertPriority.MEDIUM]: {
         label: 'Media',
-        color: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       },
       [AlertPriority.HIGH]: {
         label: 'Alta',
-        color: 'bg-orange-100 text-orange-800 border-orange-200'
+        color: 'bg-orange-100 text-orange-800 border-orange-200',
       },
       [AlertPriority.URGENT]: {
         label: 'Urgente',
-        color: 'bg-red-100 text-red-800 border-red-200'
-      }
+        color: 'bg-red-100 text-red-800 border-red-200',
+      },
     }
     return priorityMap[priority]
   }
@@ -188,13 +184,13 @@ export function MedicalAlerts({
   }
 
   const getPetName = (petId: string) => {
-    const pet = pets.find(p => p.id === petId)
+    const pet = pets.find((p) => p.id === petId)
     return pet?.name || 'Mascota desconocida'
   }
 
   if (loading) {
     return (
-      <div className={cn("space-y-4", className)}>
+      <div className={cn('space-y-4', className)}>
         {[...Array(3)].map((_, i) => (
           <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />
         ))}
@@ -217,8 +213,8 @@ export function MedicalAlerts({
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
-      {alerts.map(alert => {
+    <div className={cn('space-y-4', className)}>
+      {alerts.map((alert) => {
         const typeInfo = getAlertTypeInfo(alert.type)
         const priorityInfo = getPriorityInfo(alert.priority)
         const TypeIcon = typeInfo.icon
@@ -226,24 +222,26 @@ export function MedicalAlerts({
         const daysUntil = getDaysUntilDue(alert.dueDate)
 
         return (
-          <Card 
-            key={alert.id} 
+          <Card
+            key={alert.id}
             className={cn(
-              "transition-all hover:shadow-md",
-              overdue && !alert.isCompleted && "border-red-200 bg-red-50",
-              alert.isCompleted && "opacity-60"
+              'transition-all hover:shadow-md',
+              overdue && !alert.isCompleted && 'border-red-200 bg-red-50',
+              alert.isCompleted && 'opacity-60'
             )}
           >
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-3 flex-1">
-                  <div className={cn(
-                    "p-2 rounded-lg",
-                    overdue && !alert.isCompleted ? "bg-red-100" : "bg-muted"
-                  )}>
-                    <TypeIcon className={cn("w-4 h-4", typeInfo.color)} />
+                  <div
+                    className={cn(
+                      'p-2 rounded-lg',
+                      overdue && !alert.isCompleted ? 'bg-red-100' : 'bg-muted'
+                    )}
+                  >
+                    <TypeIcon className={cn('w-4 h-4', typeInfo.color)} />
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <h4 className="font-semibold text-sm">{alert.title}</h4>
@@ -257,11 +255,11 @@ export function MedicalAlerts({
                         </Badge>
                       )}
                     </div>
-                    
+
                     <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
                       {alert.description}
                     </p>
-                    
+
                     <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                       {!petId && (
                         <div className="flex items-center space-x-1">
@@ -269,28 +267,33 @@ export function MedicalAlerts({
                           <span>{getPetName(alert.petId)}</span>
                         </div>
                       )}
-                      
+
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-3 h-3" />
                         <span>{alert.dueDate.toLocaleDateString()}</span>
                       </div>
-                      
-                      <div className={cn(
-                        "flex items-center space-x-1",
-                        overdue && !alert.isCompleted && "text-red-600 font-medium"
-                      )}>
+
+                      <div
+                        className={cn(
+                          'flex items-center space-x-1',
+                          overdue &&
+                            !alert.isCompleted &&
+                            'text-red-600 font-medium'
+                        )}
+                      >
                         <Clock className="w-3 h-3" />
                         <span>
                           {overdue && !alert.isCompleted
-                            ? `Vencida hace ${Math.abs(daysUntil)} día${Math.abs(daysUntil) !== 1 ? 's' : ''}`
+                            ? `Vencida hace ${Math.abs(daysUntil)} día${
+                                Math.abs(daysUntil) !== 1 ? 's' : ''
+                              }`
                             : alert.isCompleted
                             ? 'Completada'
                             : daysUntil === 0
                             ? 'Hoy'
                             : daysUntil === 1
                             ? 'Mañana'
-                            : `En ${daysUntil} días`
-                          }
+                            : `En ${daysUntil} días`}
                         </span>
                       </div>
                     </div>
@@ -314,7 +317,7 @@ export function MedicalAlerts({
                           {typeInfo.label} - Prioridad {priorityInfo.label}
                         </DialogDescription>
                       </DialogHeader>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <h4 className="font-semibold mb-2">Descripción</h4>
@@ -322,7 +325,7 @@ export function MedicalAlerts({
                             {alert.description}
                           </p>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="font-medium">Mascota:</span>
@@ -338,10 +341,12 @@ export function MedicalAlerts({
                           </div>
                           <div>
                             <span className="font-medium">Estado:</span>
-                            <p>{alert.isCompleted ? 'Completada' : 'Pendiente'}</p>
+                            <p>
+                              {alert.isCompleted ? 'Completada' : 'Pendiente'}
+                            </p>
                           </div>
                         </div>
-                        
+
                         {alert.notes && (
                           <div>
                             <h4 className="font-semibold mb-2">Notas</h4>
@@ -350,20 +355,21 @@ export function MedicalAlerts({
                             </p>
                           </div>
                         )}
-                        
+
                         {alert.isCompleted && alert.completedDate && (
                           <Alert>
                             <CheckCircle className="h-4 w-4" />
                             <AlertDescription>
-                              Completada el {alert.completedDate.toLocaleDateString()}
+                              Completada el{' '}
+                              {alert.completedDate.toLocaleDateString()}
                             </AlertDescription>
                           </Alert>
                         )}
                       </div>
-                      
+
                       <DialogFooter>
                         {!alert.isCompleted && (
-                          <Button 
+                          <Button
                             onClick={() => handleCompleteAlert(alert)}
                             className="w-full"
                           >

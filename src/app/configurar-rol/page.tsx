@@ -20,9 +20,10 @@ import {
   Heart,
   Settings,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react'
-import { getUserRole } from '@/lib/clerk-auth'
+import { getUserRole, ClerkUser } from '@/lib/clerk-auth'
+import { UserRole } from '@/types'
 
 export default function ConfigurarRolPage() {
   const { user } = useUser()
@@ -30,30 +31,33 @@ export default function ConfigurarRolPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string>('')
 
-  const currentRole = user ? getUserRole(user as any) : 'client'
+  const currentRole = user ? getUserRole(user as ClerkUser) : UserRole.CLIENT
 
   const roles = [
     {
       value: 'client',
       label: 'Cliente',
-      description: 'Propietario de mascotas - Puede ver sus historias clínicas y hacer compras',
+      description:
+        'Propietario de mascotas - Puede ver sus historias clínicas y hacer compras',
       icon: Heart,
-      color: 'bg-blue-100 text-blue-800'
+      color: 'bg-blue-100 text-blue-800',
     },
     {
       value: 'veterinarian',
       label: 'Veterinario',
-      description: 'Profesional veterinario - Puede gestionar historias clínicas de todas las mascotas',
+      description:
+        'Profesional veterinario - Puede gestionar historias clínicas de todas las mascotas',
       icon: Stethoscope,
-      color: 'bg-green-100 text-green-800'
+      color: 'bg-green-100 text-green-800',
     },
     {
       value: 'admin',
       label: 'Administrador',
-      description: 'Administrador del sistema - Acceso completo a todas las funcionalidades',
+      description:
+        'Administrador del sistema - Acceso completo a todas las funcionalidades',
       icon: Shield,
-      color: 'bg-purple-100 text-purple-800'
-    }
+      color: 'bg-purple-100 text-purple-800',
+    },
   ]
 
   const handleRoleChange = async () => {
@@ -65,15 +69,16 @@ export default function ConfigurarRolPage() {
     try {
       // Simular cambio de rol (en desarrollo)
       // En producción esto se haría a través de una API que actualice Clerk
-      
+
       // Para desarrollo, mostrar instrucciones
-      setMessage(`Para cambiar a rol "${roles.find(r => r.value === selectedRole)?.label}", 
+      setMessage(`Para cambiar a rol "${
+        roles.find((r) => r.value === selectedRole)?.label
+      }", 
         ve al Dashboard de Clerk y actualiza el metadata público del usuario con: {"role": "${selectedRole}"}`)
-      
+
       // Simular delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-    } catch (error) {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    } catch {
       setMessage('Error al cambiar el rol. Intenta nuevamente.')
     } finally {
       setLoading(false)
@@ -106,15 +111,21 @@ export default function ConfigurarRolPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 {(() => {
-                  const roleInfo = roles.find(r => r.value === currentRole)
+                  const roleInfo = roles.find((r) => r.value === currentRole)
                   const RoleIcon = roleInfo?.icon || User
                   return (
                     <>
-                      <div className={`p-2 rounded-lg ${roleInfo?.color || 'bg-gray-100'}`}>
+                      <div
+                        className={`p-2 rounded-lg ${
+                          roleInfo?.color || 'bg-gray-100'
+                        }`}
+                      >
                         <RoleIcon className="w-5 h-5" />
                       </div>
                       <div>
-                        <div className="font-semibold">{roleInfo?.label || 'Cliente'}</div>
+                        <div className="font-semibold">
+                          {roleInfo?.label || 'Cliente'}
+                        </div>
                         <div className="text-sm text-muted-foreground">
                           {roleInfo?.description || 'Rol por defecto'}
                         </div>
@@ -135,13 +146,15 @@ export default function ConfigurarRolPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Seleccionar nuevo rol:</label>
+              <label className="text-sm font-medium">
+                Seleccionar nuevo rol:
+              </label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
                 <SelectTrigger>
                   <SelectValue placeholder="Elige un rol..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {roles.map(role => {
+                  {roles.map((role) => {
                     const RoleIcon = role.icon
                     return (
                       <SelectItem key={role.value} value={role.value}>
@@ -159,7 +172,7 @@ export default function ConfigurarRolPage() {
             {selectedRole && (
               <div className="p-4 bg-muted rounded-lg">
                 {(() => {
-                  const roleInfo = roles.find(r => r.value === selectedRole)
+                  const roleInfo = roles.find((r) => r.value === selectedRole)
                   const RoleIcon = roleInfo?.icon || User
                   return (
                     <div className="flex items-start space-x-3">
@@ -178,9 +191,11 @@ export default function ConfigurarRolPage() {
               </div>
             )}
 
-            <Button 
+            <Button
               onClick={handleRoleChange}
-              disabled={!selectedRole || selectedRole === currentRole || loading}
+              disabled={
+                !selectedRole || selectedRole === currentRole || loading
+              }
               className="w-full"
             >
               {loading ? 'Cambiando rol...' : 'Cambiar Rol'}
@@ -206,24 +221,36 @@ export default function ConfigurarRolPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-sm space-y-2">
-              <p><strong>Para cambiar tu rol manualmente:</strong></p>
+              <p>
+                <strong>Para cambiar tu rol manualmente:</strong>
+              </p>
               <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                <li>Ve al <a href="https://dashboard.clerk.com" target="_blank" className="text-primary hover:underline">Dashboard de Clerk</a></li>
-                <li>Busca tu usuario en la sección "Users"</li>
-                <li>Haz clic en tu usuario y ve a "Metadata"</li>
-                <li>En "Public metadata" agrega:</li>
+                <li>
+                  Ve al{' '}
+                  <a
+                    href="https://dashboard.clerk.com"
+                    target="_blank"
+                    className="text-primary hover:underline"
+                  >
+                    Dashboard de Clerk
+                  </a>
+                </li>
+                <li>Busca tu usuario en la sección Users</li>
+                <li>Haz clic en tu usuario y ve a Metadata</li>
+                <li>En Public metadata agrega:</li>
               </ol>
-              
+
               <div className="bg-gray-100 p-3 rounded-lg font-mono text-xs">
                 {`{"role": "veterinarian"}`}
               </div>
-              
+
               <p className="text-muted-foreground">
-                <strong>Opciones de rol:</strong> "client", "veterinarian", "admin"
+                <strong>Opciones de rol:</strong> client, veterinarian, admin
               </p>
-              
+
               <p className="text-muted-foreground">
-                Después de cambiar el metadata, cierra sesión y vuelve a entrar para ver los cambios.
+                Después de cambiar el metadata, cierra sesión y vuelve a entrar
+                para ver los cambios.
               </p>
             </div>
           </CardContent>
@@ -248,7 +275,7 @@ export default function ConfigurarRolPage() {
                   <li>• Agendar citas</li>
                 </ul>
               </div>
-              
+
               <div className="p-3 border rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Stethoscope className="w-4 h-4 text-green-600" />
@@ -261,7 +288,7 @@ export default function ConfigurarRolPage() {
                   <li>• Ver estadísticas</li>
                 </ul>
               </div>
-              
+
               <div className="p-3 border rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Shield className="w-4 h-4 text-purple-600" />
