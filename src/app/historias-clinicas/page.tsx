@@ -10,8 +10,6 @@ import { PetProfile } from '@/components/medical/pet-profile'
 import { MedicalRecordsList } from '@/components/medical/medical-records-list'
 import { MedicalAlerts } from '@/components/medical/medical-alerts'
 import { CreateAlertDialog } from '@/components/medical/create-alert-dialog'
-import { EditPetDialog } from '@/components/medical/edit-pet-dialog'
-import { CreateMedicalRecordDialog } from '@/components/medical/create-medical-record-dialog'
 import {
   Heart,
   Plus,
@@ -87,32 +85,12 @@ export default function HistoriasClinicasPage() {
 
   const handleAddRecord = () => {
     // Forzar actualización después de crear registro
-    setRefreshTrigger(prev => prev + 1)
-  }
-
-  const handleEditPet = (updatedPet: Pet) => {
-    // Actualizar la mascota en la lista
-    setPets(prev => prev.map(pet => pet.id === updatedPet.id ? updatedPet : pet))
-    if (selectedPet?.id === updatedPet.id) {
-      setSelectedPet(updatedPet)
-    }
+    setRefreshTrigger((prev) => prev + 1)
   }
 
   const handleCreateAlert = () => {
     // Forzar actualización después de crear alerta
-    setRefreshTrigger(prev => prev + 1)
-  }
-
-  const handleExportRecords = async () => {
-    try {
-      if (selectedPet) {
-        await MedicalRecordService.exportMedicalRecords(selectedPet.id)
-      } else {
-        await MedicalRecordService.exportMedicalRecords()
-      }
-    } catch (error) {
-      console.error('Error exporting records:', error)
-    }
+    setRefreshTrigger((prev) => prev + 1)
   }
 
   if (!isLoaded || loading) {
@@ -345,7 +323,7 @@ export default function HistoriasClinicasPage() {
                         showCompleted={false}
                         onAlertComplete={(alert) => {
                           console.log('Alerta completada', alert)
-                          setRefreshTrigger(prev => prev + 1)
+                          setRefreshTrigger((prev) => prev + 1)
                         }}
                       />
                     </div>
