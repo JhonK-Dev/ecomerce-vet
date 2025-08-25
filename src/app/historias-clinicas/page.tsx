@@ -9,6 +9,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PetProfile } from '@/components/medical/pet-profile'
 import { MedicalRecordsList } from '@/components/medical/medical-records-list'
 import { MedicalAlerts } from '@/components/medical/medical-alerts'
+import { CreateAlertDialog } from '@/components/medical/create-alert-dialog'
+import { EditPetDialog } from '@/components/medical/edit-pet-dialog'
+import { CreateMedicalRecordDialog } from '@/components/medical/create-medical-record-dialog'
 import {
   Heart,
   Plus,
@@ -30,6 +33,7 @@ export default function HistoriasClinicasPage() {
   const [stats, setStats] = useState<MedicalStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [userRole, setUserRole] = useState<UserRole>(UserRole.CLIENT)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   useEffect(() => {
     const loadUserData = async (role: UserRole) => {
@@ -68,7 +72,7 @@ export default function HistoriasClinicasPage() {
       setUserRole(role)
       loadUserData(role)
     }
-  }, [isLoaded, user])
+  }, [isLoaded, user, refreshTrigger])
 
   const handlePetSelect = async (pet: Pet) => {
     setSelectedPet(pet)
@@ -82,8 +86,33 @@ export default function HistoriasClinicasPage() {
   }
 
   const handleAddRecord = () => {
-    // Implementar modal para agregar registro médico
-    console.log('Agregar nuevo registro médico')
+    // Forzar actualización después de crear registro
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  const handleEditPet = (updatedPet: Pet) => {
+    // Actualizar la mascota en la lista
+    setPets(prev => prev.map(pet => pet.id === updatedPet.id ? updatedPet : pet))
+    if (selectedPet?.id === updatedPet.id) {
+      setSelectedPet(updatedPet)
+    }
+  }
+
+  const handleCreateAlert = () => {
+    // Forzar actualización después de crear alerta
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  const handleExportRecords = async () => {
+    try {
+      if (selectedPet) {
+        await MedicalRecordService.exportMedicalRecords(selectedPet.id)
+      } else {
+        await MedicalRecordService.exportMedicalRecords()
+      }
+    } catch (error) {
+      console.error('Error exporting records:', error)
+    }
   }
 
   if (!isLoaded || loading) {
@@ -280,7 +309,7 @@ export default function HistoriasClinicasPage() {
                   <TabsContent value="profile">
                     <PetProfile
                       pet={selectedPet}
-                      onEdit={() => console.log('Editar mascota')}
+                      onEdit={() => {}} // El botón de editar ahora está integrado en el componente
                       onAddRecord={handleAddRecord}
                       showOwnerInfo={userRole === UserRole.VETERINARIAN}
                     />
@@ -304,19 +333,20 @@ export default function HistoriasClinicasPage() {
                           Alertas y Recordatorios
                         </h3>
                         {userRole === UserRole.VETERINARIAN && (
-                          <Button variant="outline" size="sm">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Nueva Alerta
-                          </Button>
+                          <CreateAlertDialog
+                            petId={selectedPet.id}
+                            onAlertCreated={handleCreateAlert}
+                          />
                         )}
                       </div>
 
                       <MedicalAlerts
                         petId={selectedPet.id}
                         showCompleted={false}
-                        onAlertComplete={(alert) =>
+                        onAlertComplete={(alert) => {
                           console.log('Alerta completada', alert)
-                        }
+                          setRefreshTrigger(prev => prev + 1)
+                        }}
                       />
                     </div>
                   </TabsContent>

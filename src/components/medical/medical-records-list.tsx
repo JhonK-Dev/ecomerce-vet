@@ -23,6 +23,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { MedicalRecordCard } from './medical-record-card'
+import { CreateMedicalRecordDialog } from './create-medical-record-dialog'
 import {
   MedicalRecord,
   MedicalRecordType,
@@ -180,9 +181,12 @@ export function MedicalRecordsList({
     loadData()
   }
 
-  const handleExport = () => {
-    // Implementar exportación de datos
-    console.log('Exportar registros médicos')
+  const handleExport = async () => {
+    try {
+      await MedicalRecordService.exportMedicalRecords(petId)
+    } catch (error) {
+      console.error('Error exporting records:', error)
+    }
   }
 
   const getRecordTypeLabel = (type: MedicalRecordType) => {
@@ -268,10 +272,20 @@ export function MedicalRecordsList({
           </Button>
 
           {showAddButton && onAddRecord && (
-            <Button onClick={onAddRecord}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nueva Consulta
-            </Button>
+            <CreateMedicalRecordDialog
+              petId={petId}
+              onRecordCreated={(record) => {
+                console.log('Record created:', record)
+                onAddRecord?.()
+                loadData() // Recargar datos después de crear
+              }}
+              trigger={
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nueva Consulta
+                </Button>
+              }
+            />
           )}
         </div>
       </div>
@@ -413,10 +427,20 @@ export function MedicalRecordsList({
                   : 'Aún no hay registros médicos para mostrar.'}
               </p>
               {showAddButton && onAddRecord && (
-                <Button onClick={onAddRecord}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear primer registro
-                </Button>
+                <CreateMedicalRecordDialog
+                  petId={petId}
+                  onRecordCreated={(record) => {
+                    console.log('Record created:', record)
+                    onAddRecord?.()
+                    loadData() // Recargar datos después de crear
+                  }}
+                  trigger={
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Crear primer registro
+                    </Button>
+                  }
+                />
               )}
             </CardContent>
           </Card>
