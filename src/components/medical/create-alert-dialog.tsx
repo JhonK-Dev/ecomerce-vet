@@ -77,6 +77,8 @@ export function CreateAlertDialog({
       const newAlert = await MedicalRecordService.createAlert(alertData)
       onAlertCreated?.(newAlert)
       setOpen(false)
+      // Forzar recarga para mostrar la nueva alerta
+      window.location.reload()
       
       // Resetear formulario
       setFormData({
