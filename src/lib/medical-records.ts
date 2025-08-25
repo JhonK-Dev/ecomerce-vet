@@ -14,7 +14,62 @@ import {
 } from '@/types/medical-records';
 
 // Datos simulados - En producción usar base de datos real
-const pets: Pet[] = [
+// Función para cargar datos del localStorage
+const loadFromStorage = <T>(key: string, defaultData: T[]): T[] => {
+  if (typeof window === 'undefined') return defaultData;
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Convertir fechas de string a Date objects
+      return parsed.map((item: { [key: string]: unknown }) => {
+        const convertedItem = { ...item };
+        
+        // Convert date strings to Date objects
+        if (convertedItem.birthDate) convertedItem.birthDate = new Date(convertedItem.birthDate as string);
+        if (convertedItem.date) convertedItem.date = new Date(convertedItem.date as string);
+        if (convertedItem.dueDate) convertedItem.dueDate = new Date(convertedItem.dueDate as string);
+        if (convertedItem.createdAt) convertedItem.createdAt = new Date(convertedItem.createdAt as string);
+        if (convertedItem.updatedAt) convertedItem.updatedAt = new Date(convertedItem.updatedAt as string);
+        if (convertedItem.completedDate) convertedItem.completedDate = new Date(convertedItem.completedDate as string);
+        if (convertedItem.followUpDate) convertedItem.followUpDate = new Date(convertedItem.followUpDate as string);
+        
+        // Handle nested arrays
+        if (convertedItem.vaccinations && Array.isArray(convertedItem.vaccinations)) {
+          convertedItem.vaccinations = (convertedItem.vaccinations as Array<{ [key: string]: unknown }>).map(vac => ({
+            ...vac,
+            administeredDate: new Date(vac.administeredDate as string),
+            nextDueDate: new Date(vac.nextDueDate as string)
+          }));
+        }
+        
+        if (convertedItem.medications && Array.isArray(convertedItem.medications)) {
+          convertedItem.medications = (convertedItem.medications as Array<{ [key: string]: unknown }>).map(med => ({
+            ...med,
+            startDate: new Date(med.startDate as string),
+            endDate: med.endDate ? new Date(med.endDate as string) : undefined
+          }));
+        }
+        return convertedItem as T;
+      });
+    }
+  } catch (error) {
+    console.error(`Error loading ${key} from localStorage:`, error);
+  }
+  return defaultData;
+};
+
+// Función para guardar datos en localStorage
+const saveToStorage = <T>(key: string, data: T[]): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.error(`Error saving ${key} to localStorage:`, error);
+  }
+};
+
+const defaultPets: Pet[] = [
   {
     id: '1',
     name: 'Max',
@@ -62,7 +117,7 @@ const pets: Pet[] = [
   }
 ];
 
-const medicalRecords: MedicalRecord[] = [
+const defaultMedicalRecords: MedicalRecord[] = [
   {
     id: '1',
     petId: '1',
@@ -165,7 +220,7 @@ const medicalRecords: MedicalRecord[] = [
   }
 ];
 
-const medicalAlerts: MedicalAlert[] = [
+const defaultMedicalAlerts: MedicalAlert[] = [
   {
     id: 'alert_001',
     petId: '1',
@@ -194,6 +249,11 @@ const medicalAlerts: MedicalAlert[] = [
   }
 ];
 
+// Inicializar datos desde localStorage o usar datos por defecto
+const pets: Pet[] = loadFromStorage('veterinary_pets', defaultPets);
+const medicalRecords: MedicalRecord[] = loadFromStorage('veterinary_medical_records', defaultMedicalRecords);
+const medicalAlerts: MedicalAlert[] = loadFromStorage('veterinary_medical_alerts', defaultMedicalAlerts);
+
 export class MedicalRecordService {
   // ==================== GESTIÓN DE MASCOTAS ====================
   
@@ -218,6 +278,7 @@ export class MedicalRecordService {
     };
     
     pets.push(newPet);
+    saveToStorage('veterinary_pets', pets);
     return newPet;
   }
 
@@ -231,6 +292,7 @@ export class MedicalRecordService {
       updatedAt: new Date()
     };
 
+    saveToStorage('veterinary_pets', pets);
     return pets[petIndex];
   }
 
@@ -240,6 +302,7 @@ export class MedicalRecordService {
 
     pets[petIndex].isActive = false;
     pets[petIndex].updatedAt = new Date();
+    saveToStorage('veterinary_pets', pets);
     return true;
   }
 
@@ -304,6 +367,7 @@ export class MedicalRecordService {
     };
 
     medicalRecords.push(newRecord);
+    saveToStorage('veterinary_medical_records', medicalRecords);
     return newRecord;
   }
 
@@ -320,6 +384,7 @@ export class MedicalRecordService {
       updatedAt: new Date()
     };
 
+    saveToStorage('veterinary_medical_records', medicalRecords);
     return medicalRecords[recordIndex];
   }
 
@@ -386,6 +451,7 @@ export class MedicalRecordService {
     };
 
     medicalAlerts.push(newAlert);
+    saveToStorage('veterinary_medical_alerts', medicalAlerts);
     return newAlert;
   }
 
@@ -395,6 +461,7 @@ export class MedicalRecordService {
 
     medicalAlerts[alertIndex].isCompleted = true;
     medicalAlerts[alertIndex].completedDate = new Date();
+    saveToStorage('veterinary_medical_alerts', medicalAlerts);
 
     return medicalAlerts[alertIndex];
   }
@@ -459,6 +526,79 @@ export class MedicalRecordService {
       upcomingAlerts,
       vaccinationStatus
     };
+  }
+
+  // ==================== EXPORTACIÓN ====================
+
+  static async exportMedicalRecords(petId?: string): Promise<string> {
+    let records = medicalRecords;
+    let petsData = [...pets];
+
+    if (petId) {
+      records = records.filter(record => record.petId === petId);
+      petsData = petsData.filter(pet => pet.id === petId);
+    }
+
+    // Crear contenido CSV
+    const headers = [
+      'Fecha',
+      'Mascota',
+      'Tipo',
+      'Título',
+      'Descripción',
+      'Diagnóstico',
+      'Tratamiento',
+      'Peso (kg)',
+      'Temperatura (°C)',
+      'Notas'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...records.map(record => {
+        const pet = petsData.find((p: Pet) => p.id === record.petId);
+        return [
+          record.date.toLocaleDateString(),
+          pet?.name || 'Desconocida',
+          this.getRecordTypeLabel(record.type),
+          `"${record.title}"`,
+          `"${record.description}"`,
+          `"${record.diagnosis || ''}"`,
+          `"${record.treatment || ''}"`,
+          record.weight || '',
+          record.temperature || '',
+          `"${record.notes || ''}"`
+        ].join(',');
+      })
+    ].join('\n');
+
+    // Crear y descargar archivo
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `historia_clinica_${petId || 'todas'}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    return 'Archivo exportado exitosamente';
+  }
+
+  static getRecordTypeLabel(type: MedicalRecordType): string {
+    const labels = {
+      [MedicalRecordType.CONSULTATION]: 'Consulta',
+      [MedicalRecordType.VACCINATION]: 'Vacunación',
+      [MedicalRecordType.SURGERY]: 'Cirugía',
+      [MedicalRecordType.EMERGENCY]: 'Emergencia',
+      [MedicalRecordType.CHECKUP]: 'Chequeo',
+      [MedicalRecordType.LABORATORY]: 'Laboratorio',
+      [MedicalRecordType.IMAGING]: 'Imágenes',
+      [MedicalRecordType.TREATMENT]: 'Tratamiento',
+      [MedicalRecordType.FOLLOW_UP]: 'Seguimiento',
+    };
+    return labels[type];
   }
 
   // ==================== UTILIDADES ====================

@@ -22,6 +22,8 @@ import {
 } from 'lucide-react'
 import { Pet, MedicalAlert, MedicalStats } from '@/types/medical-records'
 import { MedicalRecordService } from '@/lib/medical-records'
+import { EditPetDialog } from './edit-pet-dialog'
+import { CreateMedicalRecordDialog } from './create-medical-record-dialog'
 import { cn } from '@/lib/utils'
 
 interface PetProfileProps {
@@ -34,7 +36,6 @@ interface PetProfileProps {
 
 export function PetProfile({
   pet,
-  onEdit,
   onAddRecord,
   showOwnerInfo = true,
   className,
@@ -131,17 +132,33 @@ export function PetProfile({
           </div>
 
           <div className="flex space-x-2">
-            {onEdit && (
-              <Button variant="outline" size="sm" onClick={onEdit}>
-                <Edit className="w-4 h-4 mr-2" />
-                Editar
-              </Button>
-            )}
+            <EditPetDialog
+              pet={pet}
+              onPetUpdated={(updatedPet) => {
+                // La actualización se maneja en el componente padre
+                console.log('Pet updated:', updatedPet)
+              }}
+              trigger={
+                <Button variant="outline" size="sm">
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar
+                </Button>
+              }
+            />
             {onAddRecord && (
-              <Button size="sm" onClick={onAddRecord}>
-                <Plus className="w-4 h-4 mr-2" />
-                Nueva Consulta
-              </Button>
+              <CreateMedicalRecordDialog
+                petId={pet.id}
+                onRecordCreated={(record) => {
+                  console.log('Record created:', record)
+                  onAddRecord()
+                }}
+                trigger={
+                  <Button size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nueva Consulta
+                  </Button>
+                }
+              />
             )}
           </div>
         </div>
