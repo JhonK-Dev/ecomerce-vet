@@ -461,6 +461,79 @@ export class MedicalRecordService {
     };
   }
 
+  // ==================== EXPORTACIÓN ====================
+
+  static async exportMedicalRecords(petId?: string): Promise<string> {
+    let records = medicalRecords;
+    let petsData = [...pets];
+
+    if (petId) {
+      records = records.filter(record => record.petId === petId);
+      petsData = petsData.filter(pet => pet.id === petId);
+    }
+
+    // Crear contenido CSV
+    const headers = [
+      'Fecha',
+      'Mascota',
+      'Tipo',
+      'Título',
+      'Descripción',
+      'Diagnóstico',
+      'Tratamiento',
+      'Peso (kg)',
+      'Temperatura (°C)',
+      'Notas'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...records.map(record => {
+        const pet = petsData.find((p: Pet) => p.id === record.petId);
+        return [
+          record.date.toLocaleDateString(),
+          pet?.name || 'Desconocida',
+          this.getRecordTypeLabel(record.type),
+          `"${record.title}"`,
+          `"${record.description}"`,
+          `"${record.diagnosis || ''}"`,
+          `"${record.treatment || ''}"`,
+          record.weight || '',
+          record.temperature || '',
+          `"${record.notes || ''}"`
+        ].join(',');
+      })
+    ].join('\n');
+
+    // Crear y descargar archivo
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `historia_clinica_${petId || 'todas'}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    return 'Archivo exportado exitosamente';
+  }
+
+  static getRecordTypeLabel(type: MedicalRecordType): string {
+    const labels = {
+      [MedicalRecordType.CONSULTATION]: 'Consulta',
+      [MedicalRecordType.VACCINATION]: 'Vacunación',
+      [MedicalRecordType.SURGERY]: 'Cirugía',
+      [MedicalRecordType.EMERGENCY]: 'Emergencia',
+      [MedicalRecordType.CHECKUP]: 'Chequeo',
+      [MedicalRecordType.LABORATORY]: 'Laboratorio',
+      [MedicalRecordType.IMAGING]: 'Imágenes',
+      [MedicalRecordType.TREATMENT]: 'Tratamiento',
+      [MedicalRecordType.FOLLOW_UP]: 'Seguimiento',
+    };
+    return labels[type];
+  }
+
   // ==================== UTILIDADES ====================
 
   static calculateAge(birthDate: Date): number {
