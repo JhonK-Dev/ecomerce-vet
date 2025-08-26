@@ -17,7 +17,7 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service, className, showBookButton = true }: ServiceCardProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const getCategoryColor = (category: ServiceCategory) => {
     const colors = {
@@ -51,14 +51,10 @@ export function ServiceCard({ service, className, showBookButton = true }: Servi
     return labels[category] || category;
   };
 
-  const handleBookAppointment = async () => {
-    setIsLoading(true);
-    // Simular navegación a reserva de cita
-    setTimeout(() => {
-      setIsLoading(false);
-      // Aquí se implementaría la navegación real
-      console.log('Reservar cita para servicio:', service.id);
-    }, 1000);
+  const handleBookAppointment = () => {
+    // Navegar directamente a la página de detalle del servicio
+    // donde está el componente de reserva de citas
+    window.location.href = `/servicios/${service.id}`;
   };
 
   return (
@@ -144,7 +140,7 @@ export function ServiceCard({ service, className, showBookButton = true }: Servi
                 disabled={isLoading}
               >
                 <Calendar className="h-4 w-4 mr-2" />
-                {isLoading ? 'Cargando...' : 'Reservar Cita'}
+                Reservar Cita
               </Button>
             )}
             
