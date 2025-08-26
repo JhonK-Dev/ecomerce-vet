@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -21,15 +22,23 @@ import {
   Heart, 
   Menu,
   Stethoscope,
-  User
+  User,
+  Calendar,
+  Shield,
+  ClipboardList
 } from 'lucide-react';
 import { CartService } from '@/lib/cart';
-import { ProductCategory } from '@/types';
+import { ProductCategory, UserRole } from '@/types';
+import { getUserRole, ClerkUser } from '@/lib/clerk-auth';
 
 export function Header() {
   const [cartItemsCount, setCartItemsCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+  const { user } = useUser();
+
+  // Obtener rol del usuario
+  const userRole = user ? getUserRole(user as ClerkUser) : UserRole.CLIENT;
 
   useEffect(() => {
     // Obtener conteo real del carrito
@@ -114,6 +123,50 @@ export function Header() {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
+
+                {/* Navegación específica por rol */}
+                {user && userRole === UserRole.CLIENT && (
+                  <NavigationMenuItem>
+                    <Link href="/mis-citas" legacyBehavior passHref>
+                      <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                        <ClipboardList className="h-4 w-4 mr-2" />
+                        Mis Citas
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                )}
+
+                {user && userRole === UserRole.VETERINARIAN && (
+                  <NavigationMenuItem>
+                    <Link href="/agenda" legacyBehavior passHref>
+                      <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Mi Agenda
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                )}
+
+                {user && userRole === UserRole.ADMIN && (
+                  <>
+                    <NavigationMenuItem>
+                      <Link href="/agenda" legacyBehavior passHref>
+                        <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Agenda General
+                        </NavigationMenuLink>
+                      </Link>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem>
+                      <Link href="/admin/citas" legacyBehavior passHref>
+                        <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Admin Citas
+                        </NavigationMenuLink>
+                      </Link>
+                    </NavigationMenuItem>
+                  </>
+                )}
 
               </NavigationMenuList>
             </NavigationMenu>
