@@ -4,15 +4,45 @@ import {
   AppointmentStatus, 
   AppointmentPriority, 
   AppointmentFilters,
-  AppointmentSlot,
   ReminderType,
   PaymentStatus
 } from '@/types/veterinary';
 import { VeterinarianService } from './veterinarians';
 import { AuthService } from './auth';
 
-// Datos simulados de citas
-const appointments: Appointment[] = [
+// Datos simulados de citas - con persistencia en localStorage
+const getAppointmentsFromStorage = (): Appointment[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem('ecommercevet_appointments');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Convertir strings de fecha de vuelta a Date objects
+      return parsed.map((apt: Appointment) => ({
+        ...apt,
+        date: new Date(apt.date),
+        createdAt: new Date(apt.createdAt),
+        updatedAt: new Date(apt.updatedAt),
+        followUpDate: apt.followUpDate ? new Date(apt.followUpDate) : undefined
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading appointments from storage:', error);
+  }
+  return getDefaultAppointments();
+};
+
+const saveAppointmentsToStorage = (appointments: Appointment[]) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('ecommercevet_appointments', JSON.stringify(appointments));
+    console.log('✅ Citas guardadas en localStorage:', appointments.length);
+  } catch (error) {
+    console.error('Error saving appointments to storage:', error);
+  }
+};
+
+const getDefaultAppointments = (): Appointment[] => [
   {
     id: '1',
     clientId: 'client_001',
@@ -64,113 +94,20 @@ const appointments: Appointment[] = [
     client: { id: 'client_002', name: 'Juan Pérez', email: 'juan@example.com' },
     veterinarian: { id: '2', name: 'Dra. Ana Martínez', specialties: ['GENERAL'] },
     service: { id: '2', name: 'Vacunación', price: 120 }
-  },
-  {
-    id: '3',
-    clientId: 'client_001',
-    petId: 'pet_003',
-    veterinarianId: '1',
-    serviceId: '3',
-    date: new Date(),
-    startTime: '14:00',
-    endTime: '14:30',
-    status: AppointmentStatus.IN_PROGRESS,
-    priority: AppointmentPriority.EMERGENCY,
-    reason: 'Emergencia - Dolor abdominal',
-    symptoms: 'Vómitos constantes, dolor abdominal, letargo',
-    notes: 'Paciente llegó en estado crítico, se está evaluando.',
-    followUpRequired: true,
-    remindersSent: [ReminderType.EMAIL, ReminderType.SMS],
-    paymentStatus: PaymentStatus.PENDING,
-    totalCost: 250.00,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    // Relaciones para la UI
-    pet: { id: 'pet_003', name: 'Bella', species: 'DOG' },
-    client: { id: 'client_001', name: 'María García', email: 'maria@example.com' },
-    veterinarian: { id: '1', name: 'Dr. Carlos Ruiz', specialties: ['GENERAL'] },
-    service: { id: '3', name: 'Consulta de Emergencia', price: 250 }
-  },
-  {
-    id: '4',
-    clientId: 'client_003',
-    petId: 'pet_004',
-    veterinarianId: '2',
-    serviceId: '1',
-    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Hace una semana
-    startTime: '11:00',
-    endTime: '11:30',
-    status: AppointmentStatus.COMPLETED,
-    priority: AppointmentPriority.NORMAL,
-    reason: 'Control post-operatorio',
-    symptoms: 'Revisión de cicatrización',
-    notes: 'Paciente se recupera exitosamente. Cicatrización normal. Próximo control en 15 días.',
-    diagnosis: 'Cicatrización normal post-cirugía',
-    treatment: 'Continuar con antibióticos por 5 días más',
-    followUpRequired: true,
-    followUpDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
-    remindersSent: [ReminderType.EMAIL],
-    paymentStatus: PaymentStatus.PAID,
-    totalCost: 90.00,
-    createdAt: new Date('2024-12-10'),
-    updatedAt: new Date(),
-    // Relaciones para la UI
-    pet: { id: 'pet_004', name: 'Rocky', species: 'DOG' },
-    client: { id: 'client_003', name: 'Carlos López', email: 'carlos@example.com' },
-    veterinarian: { id: '2', name: 'Dra. Ana Martínez', specialties: ['GENERAL'] },
-    service: { id: '1', name: 'Consulta General', price: 90 }
-  },
-  {
-    id: '5',
-    clientId: 'client_004',
-    petId: 'pet_005',
-    veterinarianId: '1',
-    serviceId: '4',
-    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Pasado mañana
-    startTime: '15:00',
-    endTime: '15:45',
-    status: AppointmentStatus.CANCELLED,
-    priority: AppointmentPriority.LOW,
-    reason: 'Peluquería y corte de uñas',
-    notes: 'Cancelada por el cliente - conflicto de horarios',
-    followUpRequired: false,
-    remindersSent: [ReminderType.EMAIL],
-    paymentStatus: PaymentStatus.CANCELLED,
-    totalCost: 45.00,
-    createdAt: new Date('2024-12-18'),
-    updatedAt: new Date(),
-    // Relaciones para la UI
-    pet: { id: 'pet_005', name: 'Michi', species: 'CAT' },
-    client: { id: 'client_004', name: 'Ana Rodríguez', email: 'ana@example.com' },
-    veterinarian: { id: '1', name: 'Dr. Carlos Ruiz', specialties: ['GENERAL'] },
-    service: { id: '4', name: 'Peluquería', price: 45 }
-  },
-  {
-    id: '6',
-    clientId: 'client_002',
-    petId: 'pet_006',
-    veterinarianId: '2',
-    serviceId: '5',
-    date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // En 3 días
-    startTime: '09:30',
-    endTime: '10:00',
-    status: AppointmentStatus.SCHEDULED,
-    priority: AppointmentPriority.NORMAL,
-    reason: 'Limpieza dental',
-    symptoms: 'Mal aliento, acumulación de sarro',
-    followUpRequired: false,
-    remindersSent: [],
-    paymentStatus: PaymentStatus.PENDING,
-    totalCost: 180.00,
-    createdAt: new Date('2024-12-19'),
-    updatedAt: new Date(),
-    // Relaciones para la UI
-    pet: { id: 'pet_006', name: 'Coco', species: 'DOG' },
-    client: { id: 'client_002', name: 'Juan Pérez', email: 'juan@example.com' },
-    veterinarian: { id: '2', name: 'Dra. Ana Martínez', specialties: ['GENERAL'] },
-    service: { id: '5', name: 'Limpieza Dental', price: 180 }
   }
 ];
+
+// Inicializar appointments con datos del storage
+let appointments: Appointment[] = [];
+
+// Función para inicializar appointments (se llama cuando se necesita)
+const initializeAppointments = () => {
+  if (appointments.length === 0) {
+    appointments = getAppointmentsFromStorage();
+    console.log('📅 Appointments initialized:', appointments.length, 'citas cargadas');
+  }
+  return appointments;
+};
 
 export class AppointmentService {
   // Crear nueva cita
@@ -179,9 +116,15 @@ export class AppointmentService {
   ): Promise<Appointment> {
     return new Promise(async (resolve, reject) => {
       try {
+        console.log('🔄 Iniciando creación de cita:', appointmentData);
+        
+        // Inicializar appointments si es necesario
+        initializeAppointments();
+
         // Verificar disponibilidad del veterinario
         const veterinarian = await VeterinarianService.getVeterinarianById(appointmentData.veterinarianId);
         if (!veterinarian) {
+          console.error('❌ Veterinario no encontrado:', appointmentData.veterinarianId);
           reject(new Error('Veterinario no encontrado'));
           return;
         }
@@ -194,6 +137,7 @@ export class AppointmentService {
         );
 
         if (!isAvailable) {
+          console.error('❌ Veterinario no disponible en horario:', appointmentData.startTime);
           reject(new Error('El veterinario no está disponible en el horario seleccionado'));
           return;
         }
@@ -207,6 +151,7 @@ export class AppointmentService {
         );
 
         if (hasConflict) {
+          console.error('❌ Conflicto de horario detectado');
           reject(new Error('Ya existe una cita en el horario seleccionado'));
           return;
         }
@@ -214,14 +159,19 @@ export class AppointmentService {
         setTimeout(() => {
           const newAppointment: Appointment = {
             ...appointmentData,
-            id: (appointments.length + 1).toString(),
+            id: Date.now().toString(), // ID único basado en timestamp
             status: AppointmentStatus.SCHEDULED,
             remindersSent: [],
             createdAt: new Date(),
             updatedAt: new Date()
           };
 
+          console.log('✅ Creando nueva cita:', newAppointment);
           appointments.push(newAppointment);
+          
+          // Guardar en localStorage
+          saveAppointmentsToStorage(appointments);
+          console.log('💾 Cita guardada. Total citas:', appointments.length);
           
           // Enviar confirmación automática
           this.sendConfirmationNotification(newAppointment);
@@ -229,6 +179,7 @@ export class AppointmentService {
           resolve(newAppointment);
         }, 500);
       } catch (error) {
+        console.error('❌ Error en createAppointment:', error);
         reject(error);
       }
     });
@@ -238,6 +189,9 @@ export class AppointmentService {
   static async getAppointments(filters: AppointmentFilters = {}): Promise<Appointment[]> {
     return new Promise((resolve) => {
       setTimeout(() => {
+        // Inicializar appointments
+        initializeAppointments();
+        
         let filteredAppointments = [...appointments];
 
         if (filters.veterinarianId) {
@@ -305,6 +259,7 @@ export class AppointmentService {
           return dateA.getTime() - dateB.getTime();
         });
 
+        console.log('📋 Citas filtradas:', filteredAppointments.length);
         resolve(filteredAppointments);
       }, 300);
     });
@@ -314,198 +269,11 @@ export class AppointmentService {
   static async getAppointmentById(id: string): Promise<Appointment | null> {
     return new Promise((resolve) => {
       setTimeout(() => {
+        initializeAppointments();
         const appointment = appointments.find(apt => apt.id === id);
         resolve(appointment || null);
       }, 200);
     });
-  }
-
-  // Actualizar estado de cita
-  static async updateAppointmentStatus(
-    id: string, 
-    status: AppointmentStatus, 
-    notes?: string
-  ): Promise<Appointment | null> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = appointments.findIndex(apt => apt.id === id);
-        if (index === -1) {
-          resolve(null);
-          return;
-        }
-
-        appointments[index] = {
-          ...appointments[index],
-          status,
-          notes: notes || appointments[index].notes,
-          updatedAt: new Date()
-        };
-
-        // Enviar notificación de cambio de estado
-        this.sendStatusChangeNotification(appointments[index]);
-
-        resolve(appointments[index]);
-      }, 300);
-    });
-  }
-
-  // Reprogramar cita
-  static async rescheduleAppointment(
-    id: string,
-    newDate: Date,
-    newStartTime: string,
-    newEndTime: string
-  ): Promise<Appointment | null> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const appointment = await this.getAppointmentById(id);
-        if (!appointment) {
-          reject(new Error('Cita no encontrada'));
-          return;
-        }
-
-        // Verificar disponibilidad en la nueva fecha/hora
-        const veterinarian = await VeterinarianService.getVeterinarianById(appointment.veterinarianId);
-        if (!veterinarian) {
-          reject(new Error('Veterinario no encontrado'));
-          return;
-        }
-
-        const isAvailable = VeterinarianService.isVeterinarianAvailable(
-          veterinarian,
-          newDate,
-          newStartTime,
-          newEndTime
-        );
-
-        if (!isAvailable) {
-          reject(new Error('El veterinario no está disponible en el nuevo horario'));
-          return;
-        }
-
-        setTimeout(() => {
-          const index = appointments.findIndex(apt => apt.id === id);
-          if (index !== -1) {
-            appointments[index] = {
-              ...appointments[index],
-              date: newDate,
-              startTime: newStartTime,
-              endTime: newEndTime,
-              status: AppointmentStatus.RESCHEDULED,
-              updatedAt: new Date()
-            };
-
-            // Enviar notificación de reprogramación
-            this.sendRescheduleNotification(appointments[index]);
-
-            resolve(appointments[index]);
-          } else {
-            resolve(null);
-          }
-        }, 300);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  // Cancelar cita
-  static async cancelAppointment(id: string, reason?: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = appointments.findIndex(apt => apt.id === id);
-        if (index === -1) {
-          resolve(false);
-          return;
-        }
-
-        appointments[index] = {
-          ...appointments[index],
-          status: AppointmentStatus.CANCELLED,
-          notes: reason ? `Cancelada: ${reason}` : 'Cancelada',
-          updatedAt: new Date()
-        };
-
-        // Enviar notificación de cancelación
-        this.sendCancellationNotification(appointments[index]);
-
-        resolve(true);
-      }, 300);
-    });
-  }
-
-  // Agregar o actualizar notas médicas
-  static async addNotes(id: string, notes: string): Promise<Appointment | null> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = appointments.findIndex(apt => apt.id === id);
-        if (index === -1) {
-          resolve(null);
-          return;
-        }
-
-        appointments[index] = {
-          ...appointments[index],
-          notes,
-          updatedAt: new Date()
-        };
-
-        resolve(appointments[index]);
-      }, 300);
-    });
-  }
-
-  // Obtener slots disponibles para una fecha y veterinario
-  static async getAvailableSlots(
-    veterinarianId: string,
-    date: Date,
-    serviceDuration: number = 30
-  ): Promise<AppointmentSlot[]> {
-    return new Promise(async (resolve) => {
-      try {
-        const availableTimeSlots = await VeterinarianService.getAvailableSlots(
-          veterinarianId,
-          date,
-          serviceDuration
-        );
-
-        // No necesitamos obtener las citas existentes porque usamos hasTimeConflict directamente
-        // que ya tiene esa lógica implementada internamente
-
-        const slots: AppointmentSlot[] = availableTimeSlots.map(startTime => {
-          const endTime = this.addMinutesToTime(startTime, serviceDuration);
-          const isAvailable = !this.hasTimeConflict(veterinarianId, date, startTime, endTime);
-
-          return {
-            date,
-            startTime,
-            endTime,
-            veterinarianId,
-            isAvailable
-          };
-        });
-
-        resolve(slots);
-      } catch (err) {
-        console.error('Error al obtener slots disponibles:', err);
-        resolve([]);
-      }
-    });
-  }
-
-  // Obtener próximas citas de un cliente
-  static async getUpcomingAppointments(clientId: string): Promise<Appointment[]> {
-    const today = new Date();
-    return this.getAppointments({
-      clientId,
-      dateFrom: today,
-      status: AppointmentStatus.CONFIRMED
-    });
-  }
-
-  // Obtener historial de citas de una mascota
-  static async getPetAppointmentHistory(petId: string): Promise<Appointment[]> {
-    return this.getAppointments({ petId });
   }
 
   // Verificar conflictos de horario
@@ -540,9 +308,10 @@ export class AppointmentService {
   // Enviar notificaciones (usando API route del servidor)
   private static async sendConfirmationNotification(appointment: Appointment): Promise<void> {
     const user = AuthService.getUserById(appointment.clientId);
-    const userEmail = user ? user.email : 'delivered@resend.dev';
+    const userEmail = user ? user.email : 'kerrymamani@gmail.com';
 
     try {
+      console.log('📧 Enviando email de confirmación a:', userEmail);
       await fetch('/api/send-appointment-email', {
         method: 'POST',
         headers: {
@@ -559,51 +328,6 @@ export class AppointmentService {
     }
   }
 
-  private static async sendStatusChangeNotification(appointment: Appointment): Promise<void> {
-    const user = AuthService.getUserById(appointment.clientId);
-    const userEmail = user ? user.email : 'delivered@resend.dev';
-    
-    try {
-      await fetch('/api/send-appointment-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appointment, userEmail, type: 'reminder' }),
-      });
-    } catch (error) {
-      console.error('Error enviando notificación de cambio de estado:', error);
-    }
-  }
-
-  private static async sendRescheduleNotification(appointment: Appointment): Promise<void> {
-    const user = AuthService.getUserById(appointment.clientId);
-    const userEmail = user ? user.email : 'delivered@resend.dev';
-    
-    try {
-      await fetch('/api/send-appointment-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appointment, userEmail, type: 'reminder' }),
-      });
-    } catch (error) {
-      console.error('Error enviando notificación de reprogramación:', error);
-    }
-  }
-
-  private static async sendCancellationNotification(appointment: Appointment): Promise<void> {
-    const user = AuthService.getUserById(appointment.clientId);
-    const userEmail = user ? user.email : 'delivered@resend.dev';
-    
-    try {
-      await fetch('/api/send-appointment-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appointment, userEmail, type: 'cancellation' }),
-      });
-    } catch (error) {
-      console.error('Error enviando notificación de cancelación:', error);
-    }
-  }
-
   // Utilidades
   private static timeToMinutes(time: string): number {
     const [hours, minutes] = time.split(':').map(Number);
@@ -615,5 +339,59 @@ export class AppointmentService {
     const hours = Math.floor(totalMinutes / 60);
     const mins = totalMinutes % 60;
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  }
+
+  // Cancelar cita
+  static async cancelAppointment(id: string, reason?: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        initializeAppointments();
+        const index = appointments.findIndex(apt => apt.id === id);
+        if (index === -1) {
+          resolve(false);
+          return;
+        }
+
+        appointments[index] = {
+          ...appointments[index],
+          status: AppointmentStatus.CANCELLED,
+          notes: reason ? `Cancelada: ${reason}` : 'Cancelada',
+          updatedAt: new Date()
+        };
+
+        // Guardar cambios
+        saveAppointmentsToStorage(appointments);
+        resolve(true);
+      }, 300);
+    });
+  }
+
+  // Actualizar estado de cita
+  static async updateAppointmentStatus(
+    id: string, 
+    status: AppointmentStatus, 
+    notes?: string
+  ): Promise<Appointment | null> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        initializeAppointments();
+        const index = appointments.findIndex(apt => apt.id === id);
+        if (index === -1) {
+          resolve(null);
+          return;
+        }
+
+        appointments[index] = {
+          ...appointments[index],
+          status,
+          notes: notes || appointments[index].notes,
+          updatedAt: new Date()
+        };
+
+        // Guardar cambios
+        saveAppointmentsToStorage(appointments);
+        resolve(appointments[index]);
+      }, 300);
+    });
   }
 }

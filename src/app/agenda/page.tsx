@@ -212,7 +212,15 @@ export default function AgendaPage() {
 
   const handleAddNotes = async (appointmentId: string, notes: string) => {
     try {
-      await AppointmentService.addNotes(appointmentId, notes)
+      // Usar updateAppointmentStatus para actualizar las notas
+      const appointment = appointments.find((apt) => apt.id === appointmentId)
+      if (appointment) {
+        await AppointmentService.updateAppointmentStatus(
+          appointmentId,
+          appointment.status,
+          notes
+        )
+      }
       setShowEditDialog(false)
       setEditNotes('')
       setSelectedAppointment(null)
