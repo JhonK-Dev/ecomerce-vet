@@ -1,11 +1,12 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,45 +14,77 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
-import { UserButton } from '@/components/auth/user-button';
-import { 
-  Search, 
-  ShoppingCart, 
-  Heart, 
+} from '@/components/ui/navigation-menu'
+import { UserButton } from '@/components/auth/user-button'
+import {
+  Search,
+  ShoppingCart,
+  Heart,
   Menu,
   Stethoscope,
-  User
-} from 'lucide-react';
-import { CartService } from '@/lib/cart';
-import { ProductCategory } from '@/types';
+  User,
+  Calendar,
+  Shield,
+  ClipboardList,
+} from 'lucide-react'
+import { CartService } from '@/lib/cart'
+import { ProductCategory, UserRole } from '@/types'
+import { getUserRole, ClerkUser } from '@/lib/clerk-auth'
 
 export function Header() {
-  const [cartItemsCount, setCartItemsCount] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const router = useRouter();
+  const [cartItemsCount, setCartItemsCount] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const router = useRouter()
+  const { user } = useUser()
+
+  // Obtener rol del usuario
+  const userRole = user ? getUserRole(user as ClerkUser) : UserRole.CLIENT
 
   useEffect(() => {
     // Obtener conteo real del carrito
-    const cart = CartService.getCart();
-    setCartItemsCount(cart.items.length);
-  }, []);
+    const cart = CartService.getCart()
+    setCartItemsCount(cart.items.length)
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (searchQuery.trim()) {
-      router.push(`/productos?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/productos?search=${encodeURIComponent(searchQuery.trim())}`)
     }
-  };
+  }
 
   const categories = [
-    { name: 'Comida', value: ProductCategory.FOOD, description: 'Alimento balanceado y snacks' },
-    { name: 'Medicina', value: ProductCategory.MEDICINE, description: 'Medicamentos y tratamientos' },
-    { name: 'Accesorios', value: ProductCategory.ACCESSORIES, description: 'Collares, correas y más' },
-    { name: 'Higiene', value: ProductCategory.HYGIENE, description: 'Shampoos y productos de limpieza' },
-    { name: 'Juguetes', value: ProductCategory.TOYS, description: 'Entretenimiento para mascotas' },
-    { name: 'Suplementos', value: ProductCategory.SUPPLEMENTS, description: 'Vitaminas y suplementos' },
-  ];
+    {
+      name: 'Comida',
+      value: ProductCategory.FOOD,
+      description: 'Alimento balanceado y snacks',
+    },
+    {
+      name: 'Medicina',
+      value: ProductCategory.MEDICINE,
+      description: 'Medicamentos y tratamientos',
+    },
+    {
+      name: 'Accesorios',
+      value: ProductCategory.ACCESSORIES,
+      description: 'Collares, correas y más',
+    },
+    {
+      name: 'Higiene',
+      value: ProductCategory.HYGIENE,
+      description: 'Shampoos y productos de limpieza',
+    },
+    {
+      name: 'Juguetes',
+      value: ProductCategory.TOYS,
+      description: 'Entretenimiento para mascotas',
+    },
+    {
+      name: 'Suplementos',
+      value: ProductCategory.SUPPLEMENTS,
+      description: 'Vitaminas y suplementos',
+    },
+  ]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -63,7 +96,9 @@ export function Header() {
               <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
                 <Stethoscope className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-xl hidden sm:inline-block">EcommerceVet</span>
+              <span className="font-bold text-xl hidden sm:inline-block">
+                EcommerceVet
+              </span>
             </Link>
 
             {/* Navigation Menu */}
@@ -115,12 +150,58 @@ export function Header() {
                   </Link>
                 </NavigationMenuItem>
 
+                {/* Navegación específica por rol */}
+                {user && userRole === UserRole.CLIENT && (
+                  <NavigationMenuItem>
+                    <Link href="/mis-citas" legacyBehavior passHref>
+                      <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                        <ClipboardList className="h-4 w-4 mr-2" />
+                        Mis Citas
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                )}
+
+                {user && userRole === UserRole.VETERINARIAN && (
+                  <NavigationMenuItem>
+                    <Link href="/agenda" legacyBehavior passHref>
+                      <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Mi Agenda
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                )}
+
+                {user && userRole === UserRole.ADMIN && (
+                  <>
+                    <NavigationMenuItem>
+                      <Link href="/agenda" legacyBehavior passHref>
+                        <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Agenda General
+                        </NavigationMenuLink>
+                      </Link>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem>
+                      <Link href="/admin/citas" legacyBehavior passHref>
+                        <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Admin Citas
+                        </NavigationMenuLink>
+                      </Link>
+                    </NavigationMenuItem>
+                  </>
+                )}
               </NavigationMenuList>
             </NavigationMenu>
           </div>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-sm mx-4">
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex flex-1 max-w-sm mx-4"
+          >
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -140,8 +221,8 @@ export function Header() {
               <Link href="/carrito" className="relative">
                 <ShoppingCart className="h-5 w-5" />
                 {cartItemsCount > 0 && (
-                  <Badge 
-                    variant="destructive" 
+                  <Badge
+                    variant="destructive"
                     className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
                   >
                     {cartItemsCount}
@@ -177,5 +258,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  );
+  )
 }

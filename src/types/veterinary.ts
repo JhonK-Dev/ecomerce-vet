@@ -169,6 +169,11 @@ export interface Appointment {
   totalCost: number;
   createdAt: Date;
   updatedAt: Date;
+  // Relaciones opcionales para la UI
+  pet?: { id: string; name: string; species?: string };
+  client?: { name: string; email: string; id: string };
+  veterinarian?: { id: string; name: string; specialties?: string[] };
+  service?: { id: string; name: string; price?: number };
 }
 
 export enum AppointmentStatus {
