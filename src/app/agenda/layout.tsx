@@ -31,7 +31,7 @@ export default function AgendaLayout({
   }
 
   const userRole = getUserRole(user as ClerkUser)
-  
+
   // Solo veterinarios y admins pueden acceder a la agenda
   if (userRole !== UserRole.VETERINARIAN && userRole !== UserRole.ADMIN) {
     return (
@@ -39,7 +39,8 @@ export default function AgendaLayout({
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            No tienes permisos para acceder a esta sección. Solo veterinarios y administradores pueden gestionar la agenda.{' '}
+            No tienes permisos para acceder a esta sección. Solo veterinarios y
+            administradores pueden gestionar la agenda.{' '}
             <Link href="/" className="underline">
               Ir al inicio
             </Link>

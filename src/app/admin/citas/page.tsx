@@ -49,7 +49,11 @@ import {
   UserCheck,
   Activity,
 } from 'lucide-react'
-import { Appointment, AppointmentStatus, AppointmentPriority } from '@/types/veterinary'
+import {
+  Appointment,
+  AppointmentStatus,
+  AppointmentPriority,
+} from '@/types/veterinary'
 import { AppointmentService } from '@/lib/appointments'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -64,7 +68,8 @@ export default function AdminCitasPage() {
   const [veterinarianFilter, setVeterinarianFilter] = useState<string>('all')
   const [dateFilter, setDateFilter] = useState<string>('all')
   const [activeTab, setActiveTab] = useState('todas')
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showStatsDialog, setShowStatsDialog] = useState(false)
   const [editNotes, setEditNotes] = useState('')
@@ -143,19 +148,29 @@ export default function AdminCitasPage() {
     thisWeek.setDate(thisWeek.getDate() - 7)
     const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 
-    let filtered = appointments.filter(apt => {
+    let filtered = appointments.filter((apt) => {
       const appointmentDate = new Date(apt.date)
-      const appointmentDay = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate())
-      
+      const appointmentDay = new Date(
+        appointmentDate.getFullYear(),
+        appointmentDate.getMonth(),
+        appointmentDate.getDate()
+      )
+
       switch (filter) {
         case 'hoy':
           return appointmentDay.getTime() === today.getTime()
         case 'pendientes':
-          return apt.status === AppointmentStatus.SCHEDULED || apt.status === AppointmentStatus.CONFIRMED
+          return (
+            apt.status === AppointmentStatus.SCHEDULED ||
+            apt.status === AppointmentStatus.CONFIRMED
+          )
         case 'completadas':
           return apt.status === AppointmentStatus.COMPLETED
         case 'canceladas':
-          return apt.status === AppointmentStatus.CANCELLED || apt.status === AppointmentStatus.NO_SHOW
+          return (
+            apt.status === AppointmentStatus.CANCELLED ||
+            apt.status === AppointmentStatus.NO_SHOW
+          )
         case 'todas':
           return true
         default:
@@ -165,36 +180,38 @@ export default function AdminCitasPage() {
 
     // Filtrar por estado
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(apt => apt.status === statusFilter)
+      filtered = filtered.filter((apt) => apt.status === statusFilter)
     }
 
     // Filtrar por prioridad
     if (priorityFilter !== 'all') {
-      filtered = filtered.filter(apt => apt.priority === priorityFilter)
+      filtered = filtered.filter((apt) => apt.priority === priorityFilter)
     }
 
     // Filtrar por veterinario
     if (veterinarianFilter !== 'all') {
-      filtered = filtered.filter(apt => apt.veterinarianId === veterinarianFilter)
+      filtered = filtered.filter(
+        (apt) => apt.veterinarianId === veterinarianFilter
+      )
     }
 
     // Filtrar por fecha
     if (dateFilter !== 'all') {
       switch (dateFilter) {
         case 'today':
-          filtered = filtered.filter(apt => {
+          filtered = filtered.filter((apt) => {
             const aptDate = new Date(apt.date)
             return aptDate.toDateString() === today.toDateString()
           })
           break
         case 'week':
-          filtered = filtered.filter(apt => {
+          filtered = filtered.filter((apt) => {
             const aptDate = new Date(apt.date)
             return aptDate >= thisWeek
           })
           break
         case 'month':
-          filtered = filtered.filter(apt => {
+          filtered = filtered.filter((apt) => {
             const aptDate = new Date(apt.date)
             return aptDate >= thisMonth
           })
@@ -204,12 +221,19 @@ export default function AdminCitasPage() {
 
     // Filtrar por búsqueda
     if (searchQuery) {
-      filtered = filtered.filter(apt => 
-        apt.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (apt.pet?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (apt.client?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (apt.veterinarian?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        apt.symptoms?.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (apt) =>
+          apt.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (apt.pet?.name || '')
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          (apt.client?.name || '')
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          (apt.veterinarian?.name || '')
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          apt.symptoms?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
@@ -221,7 +245,10 @@ export default function AdminCitasPage() {
     })
   }
 
-  const handleStatusChange = async (appointmentId: string, newStatus: AppointmentStatus) => {
+  const handleStatusChange = async (
+    appointmentId: string,
+    newStatus: AppointmentStatus
+  ) => {
     try {
       await AppointmentService.updateAppointmentStatus(appointmentId, newStatus)
       loadAppointments()
@@ -252,10 +279,18 @@ export default function AdminCitasPage() {
 
   const getStats = () => {
     const total = appointments.length
-    const completed = appointments.filter(apt => apt.status === AppointmentStatus.COMPLETED).length
-    const pending = appointments.filter(apt => apt.status === AppointmentStatus.SCHEDULED || apt.status === AppointmentStatus.CONFIRMED).length
-    const cancelled = appointments.filter(apt => apt.status === AppointmentStatus.CANCELLED).length
-    const today = appointments.filter(apt => {
+    const completed = appointments.filter(
+      (apt) => apt.status === AppointmentStatus.COMPLETED
+    ).length
+    const pending = appointments.filter(
+      (apt) =>
+        apt.status === AppointmentStatus.SCHEDULED ||
+        apt.status === AppointmentStatus.CONFIRMED
+    ).length
+    const cancelled = appointments.filter(
+      (apt) => apt.status === AppointmentStatus.CANCELLED
+    ).length
+    const today = appointments.filter((apt) => {
       const aptDate = new Date(apt.date)
       const todayDate = new Date()
       return aptDate.toDateString() === todayDate.toDateString()
@@ -268,18 +303,27 @@ export default function AdminCitasPage() {
 
   const hoyAppointments = filterAppointments(appointments, 'hoy')
   const pendientesAppointments = filterAppointments(appointments, 'pendientes')
-  const completadasAppointments = filterAppointments(appointments, 'completadas')
+  const completadasAppointments = filterAppointments(
+    appointments,
+    'completadas'
+  )
   const canceladasAppointments = filterAppointments(appointments, 'canceladas')
   const todasAppointments = filterAppointments(appointments, 'todas')
 
   const getAppointmentsByTab = (tab: string) => {
     switch (tab) {
-      case 'hoy': return hoyAppointments
-      case 'pendientes': return pendientesAppointments
-      case 'completadas': return completadasAppointments
-      case 'canceladas': return canceladasAppointments
-      case 'todas': return todasAppointments
-      default: return []
+      case 'hoy':
+        return hoyAppointments
+      case 'pendientes':
+        return pendientesAppointments
+      case 'completadas':
+        return completadasAppointments
+      case 'canceladas':
+        return canceladasAppointments
+      case 'todas':
+        return todasAppointments
+      default:
+        return []
     }
   }
 
@@ -319,7 +363,9 @@ export default function AdminCitasPage() {
             <div className="flex items-center">
               <Activity className="h-8 w-8 text-blue-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Total Citas</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Citas
+                </p>
                 <p className="text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
@@ -341,7 +387,9 @@ export default function AdminCitasPage() {
             <div className="flex items-center">
               <Clock className="h-8 w-8 text-yellow-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Pendientes</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Pendientes
+                </p>
                 <p className="text-2xl font-bold">{stats.pending}</p>
               </div>
             </div>
@@ -352,7 +400,9 @@ export default function AdminCitasPage() {
             <div className="flex items-center">
               <CheckCircle className="h-8 w-8 text-emerald-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Completadas</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Completadas
+                </p>
                 <p className="text-2xl font-bold">{stats.completed}</p>
               </div>
             </div>
@@ -363,7 +413,9 @@ export default function AdminCitasPage() {
             <div className="flex items-center">
               <XCircle className="h-8 w-8 text-red-500" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Canceladas</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Canceladas
+                </p>
                 <p className="text-2xl font-bold">{stats.cancelled}</p>
               </div>
             </div>
@@ -396,11 +448,21 @@ export default function AdminCitasPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value={AppointmentStatus.SCHEDULED}>Programada</SelectItem>
-                  <SelectItem value={AppointmentStatus.CONFIRMED}>Confirmada</SelectItem>
-                  <SelectItem value={AppointmentStatus.IN_PROGRESS}>En Progreso</SelectItem>
-                  <SelectItem value={AppointmentStatus.COMPLETED}>Completada</SelectItem>
-                  <SelectItem value={AppointmentStatus.CANCELLED}>Cancelada</SelectItem>
+                  <SelectItem value={AppointmentStatus.SCHEDULED}>
+                    Programada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.CONFIRMED}>
+                    Confirmada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.IN_PROGRESS}>
+                    En Progreso
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.COMPLETED}>
+                    Completada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.CANCELLED}>
+                    Cancelada
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -412,16 +474,23 @@ export default function AdminCitasPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value={AppointmentPriority.EMERGENCY}>Emergencia</SelectItem>
+                  <SelectItem value={AppointmentPriority.EMERGENCY}>
+                    Emergencia
+                  </SelectItem>
                   <SelectItem value={AppointmentPriority.HIGH}>Alta</SelectItem>
-                  <SelectItem value={AppointmentPriority.NORMAL}>Normal</SelectItem>
+                  <SelectItem value={AppointmentPriority.NORMAL}>
+                    Normal
+                  </SelectItem>
                   <SelectItem value={AppointmentPriority.LOW}>Baja</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label htmlFor="veterinarian">Veterinario</Label>
-              <Select value={veterinarianFilter} onValueChange={setVeterinarianFilter}>
+              <Select
+                value={veterinarianFilter}
+                onValueChange={setVeterinarianFilter}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Veterinario" />
                 </SelectTrigger>
@@ -481,90 +550,122 @@ export default function AdminCitasPage() {
           </TabsTrigger>
         </TabsList>
 
-        {['todas', 'hoy', 'pendientes', 'completadas', 'canceladas'].map((tab) => (
-          <TabsContent key={tab} value={tab}>
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-2 text-muted-foreground">Cargando citas...</p>
-              </div>
-            ) : getAppointmentsByTab(tab).length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No hay citas</h3>
-                  <p className="text-muted-foreground">
-                    No se encontraron citas para los filtros seleccionados
+        {['todas', 'hoy', 'pendientes', 'completadas', 'canceladas'].map(
+          (tab) => (
+            <TabsContent key={tab} value={tab}>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-2 text-muted-foreground">
+                    Cargando citas...
                   </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Hora</TableHead>
-                        <TableHead>Paciente</TableHead>
-                        <TableHead>Propietario</TableHead>
-                        <TableHead>Veterinario</TableHead>
-                        <TableHead>Motivo</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Prioridad</TableHead>
-                        <TableHead>Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {getAppointmentsByTab(tab).map((appointment) => (
-                        <TableRow key={appointment.id}>
-                          <TableCell>
-                            {format(new Date(appointment.date), 'dd/MM/yyyy', { locale: es })}
-                          </TableCell>
-                          <TableCell>
-                            {appointment.startTime} - {appointment.endTime}
-                          </TableCell>
-                          <TableCell>{appointment.pet?.name || 'N/A'}</TableCell>
-                          <TableCell>{appointment.client?.name || 'N/A'}</TableCell>
-                          <TableCell>{appointment.veterinarian?.name || 'N/A'}</TableCell>
-                          <TableCell className="max-w-xs truncate">{appointment.reason}</TableCell>
-                          <TableCell>
-                            <Badge className={getStatusColor(appointment.status)}>
-                              {getStatusLabel(appointment.status)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getPriorityColor(appointment.priority)}>
-                              {getPriorityLabel(appointment.priority)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button variant="outline" size="sm" onClick={() => openEditDialog(appointment)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {appointment.status === AppointmentStatus.SCHEDULED && (
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => handleStatusChange(appointment.id, AppointmentStatus.CONFIRMED)}
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
+                </div>
+              ) : getAppointmentsByTab(tab).length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-8">
+                    <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No hay citas</h3>
+                    <p className="text-muted-foreground">
+                      No se encontraron citas para los filtros seleccionados
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Fecha</TableHead>
+                          <TableHead>Hora</TableHead>
+                          <TableHead>Paciente</TableHead>
+                          <TableHead>Propietario</TableHead>
+                          <TableHead>Veterinario</TableHead>
+                          <TableHead>Motivo</TableHead>
+                          <TableHead>Estado</TableHead>
+                          <TableHead>Prioridad</TableHead>
+                          <TableHead>Acciones</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        ))}
+                      </TableHeader>
+                      <TableBody>
+                        {getAppointmentsByTab(tab).map((appointment) => (
+                          <TableRow key={appointment.id}>
+                            <TableCell>
+                              {format(
+                                new Date(appointment.date),
+                                'dd/MM/yyyy',
+                                { locale: es }
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {appointment.startTime} - {appointment.endTime}
+                            </TableCell>
+                            <TableCell>
+                              {appointment.pet?.name || 'N/A'}
+                            </TableCell>
+                            <TableCell>
+                              {appointment.client?.name || 'N/A'}
+                            </TableCell>
+                            <TableCell>
+                              {appointment.veterinarian?.name || 'N/A'}
+                            </TableCell>
+                            <TableCell className="max-w-xs truncate">
+                              {appointment.reason}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={getStatusColor(appointment.status)}
+                              >
+                                {getStatusLabel(appointment.status)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={getPriorityColor(
+                                  appointment.priority
+                                )}
+                              >
+                                {getPriorityLabel(appointment.priority)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openEditDialog(appointment)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {appointment.status ===
+                                  AppointmentStatus.SCHEDULED && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() =>
+                                      handleStatusChange(
+                                        appointment.id,
+                                        AppointmentStatus.CONFIRMED
+                                      )
+                                    }
+                                  >
+                                    <CheckCircle className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          )
+        )}
       </Tabs>
 
       {/* Dialog para editar notas */}
@@ -573,26 +674,45 @@ export default function AdminCitasPage() {
           <DialogHeader>
             <DialogTitle>Gestionar Cita</DialogTitle>
             <DialogDescription>
-              Administra la cita de {selectedAppointment?.pet?.name || 'la mascota'}
+              Administra la cita de{' '}
+              {selectedAppointment?.pet?.name || 'la mascota'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label htmlFor="status">Estado de la Cita</Label>
-              <Select 
-                value={selectedAppointment?.status || ''} 
-                onValueChange={(status) => selectedAppointment && handleStatusChange(selectedAppointment.id, status as AppointmentStatus)}
+              <Select
+                value={selectedAppointment?.status || ''}
+                onValueChange={(status) =>
+                  selectedAppointment &&
+                  handleStatusChange(
+                    selectedAppointment.id,
+                    status as AppointmentStatus
+                  )
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={AppointmentStatus.SCHEDULED}>Programada</SelectItem>
-                  <SelectItem value={AppointmentStatus.CONFIRMED}>Confirmada</SelectItem>
-                  <SelectItem value={AppointmentStatus.IN_PROGRESS}>En Progreso</SelectItem>
-                  <SelectItem value={AppointmentStatus.COMPLETED}>Completada</SelectItem>
-                  <SelectItem value={AppointmentStatus.CANCELLED}>Cancelada</SelectItem>
-                  <SelectItem value={AppointmentStatus.NO_SHOW}>No Asistió</SelectItem>
+                  <SelectItem value={AppointmentStatus.SCHEDULED}>
+                    Programada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.CONFIRMED}>
+                    Confirmada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.IN_PROGRESS}>
+                    En Progreso
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.COMPLETED}>
+                    Completada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.CANCELLED}>
+                    Cancelada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.NO_SHOW}>
+                    No Asistió
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -611,7 +731,12 @@ export default function AdminCitasPage() {
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={() => selectedAppointment && handleAddNotes(selectedAppointment.id, editNotes)}>
+            <Button
+              onClick={() =>
+                selectedAppointment &&
+                handleAddNotes(selectedAppointment.id, editNotes)
+              }
+            >
               Guardar Cambios
             </Button>
           </DialogFooter>
@@ -643,15 +768,21 @@ export default function AdminCitasPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Completadas:</span>
-                    <span className="font-semibold text-green-600">{stats.completed}</span>
+                    <span className="font-semibold text-green-600">
+                      {stats.completed}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Pendientes:</span>
-                    <span className="font-semibold text-yellow-600">{stats.pending}</span>
+                    <span className="font-semibold text-yellow-600">
+                      {stats.pending}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Canceladas:</span>
-                    <span className="font-semibold text-red-600">{stats.cancelled}</span>
+                    <span className="font-semibold text-red-600">
+                      {stats.cancelled}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -668,13 +799,19 @@ export default function AdminCitasPage() {
                   <div className="flex justify-between">
                     <span>Tasa de finalización:</span>
                     <span className="font-semibold">
-                      {stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%
+                      {stats.total > 0
+                        ? Math.round((stats.completed / stats.total) * 100)
+                        : 0}
+                      %
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tasa de cancelación:</span>
                     <span className="font-semibold">
-                      {stats.total > 0 ? Math.round((stats.cancelled / stats.total) * 100) : 0}%
+                      {stats.total > 0
+                        ? Math.round((stats.cancelled / stats.total) * 100)
+                        : 0}
+                      %
                     </span>
                   </div>
                 </div>
@@ -682,9 +819,7 @@ export default function AdminCitasPage() {
             </Card>
           </div>
           <DialogFooter>
-            <Button onClick={() => setShowStatsDialog(false)}>
-              Cerrar
-            </Button>
+            <Button onClick={() => setShowStatsDialog(false)}>Cerrar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

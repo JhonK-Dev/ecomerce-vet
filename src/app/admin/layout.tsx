@@ -31,7 +31,7 @@ export default function AdminLayout({
   }
 
   const userRole = getUserRole(user as ClerkUser)
-  
+
   // Solo administradores pueden acceder
   if (userRole !== UserRole.ADMIN) {
     return (
@@ -39,7 +39,8 @@ export default function AdminLayout({
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            No tienes permisos para acceder a esta sección. Solo administradores pueden acceder al panel de administración.{' '}
+            No tienes permisos para acceder a esta sección. Solo administradores
+            pueden acceder al panel de administración.{' '}
             <Link href="/" className="underline">
               Ir al inicio
             </Link>

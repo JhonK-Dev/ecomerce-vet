@@ -39,7 +39,11 @@ import {
   Stethoscope,
   Filter,
 } from 'lucide-react'
-import { Appointment, AppointmentStatus, AppointmentPriority } from '@/types/veterinary'
+import {
+  Appointment,
+  AppointmentStatus,
+  AppointmentPriority,
+} from '@/types/veterinary'
 import { AppointmentService } from '@/lib/appointments'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -54,7 +58,8 @@ export default function AgendaPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [activeTab, setActiveTab] = useState('hoy')
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editNotes, setEditNotes] = useState('')
 
@@ -64,13 +69,13 @@ export default function AgendaPage() {
     try {
       setLoading(true)
       const filters: { veterinarianId?: string } = {}
-      
+
       // Si es veterinario, solo ver sus citas
       if (userRole === UserRole.VETERINARIAN) {
         filters.veterinarianId = user?.id
       }
       // Si es admin, ve todas las citas (sin filtro)
-      
+
       const appointmentsList = await AppointmentService.getAppointments(filters)
       setAppointments(appointmentsList)
     } catch (error) {
@@ -140,10 +145,14 @@ export default function AgendaPage() {
     const nextWeek = new Date(today)
     nextWeek.setDate(nextWeek.getDate() + 7)
 
-    let filtered = appointments.filter(apt => {
+    let filtered = appointments.filter((apt) => {
       const appointmentDate = new Date(apt.date)
-      const appointmentDay = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate())
-      
+      const appointmentDay = new Date(
+        appointmentDate.getFullYear(),
+        appointmentDate.getMonth(),
+        appointmentDate.getDate()
+      )
+
       switch (filter) {
         case 'hoy':
           return appointmentDay.getTime() === today.getTime()
@@ -160,20 +169,23 @@ export default function AgendaPage() {
 
     // Filtrar por estado
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(apt => apt.status === statusFilter)
+      filtered = filtered.filter((apt) => apt.status === statusFilter)
     }
 
     // Filtrar por prioridad
     if (priorityFilter !== 'all') {
-      filtered = filtered.filter(apt => apt.priority === priorityFilter)
+      filtered = filtered.filter((apt) => apt.priority === priorityFilter)
     }
 
     // Filtrar por búsqueda
     if (searchQuery) {
-      filtered = filtered.filter(apt => 
-        apt.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (apt.pet?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        apt.symptoms?.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (apt) =>
+          apt.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (apt.pet?.name || '')
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          apt.symptoms?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
@@ -185,7 +197,10 @@ export default function AgendaPage() {
     })
   }
 
-  const handleStatusChange = async (appointmentId: string, newStatus: AppointmentStatus) => {
+  const handleStatusChange = async (
+    appointmentId: string,
+    newStatus: AppointmentStatus
+  ) => {
     try {
       await AppointmentService.updateAppointmentStatus(appointmentId, newStatus)
       loadAppointments()
@@ -221,11 +236,16 @@ export default function AgendaPage() {
 
   const getAppointmentsByTab = (tab: string) => {
     switch (tab) {
-      case 'hoy': return hoyAppointments
-      case 'manana': return mananaAppointments
-      case 'semana': return semanaAppointments
-      case 'todas': return todasAppointments
-      default: return []
+      case 'hoy':
+        return hoyAppointments
+      case 'manana':
+        return mananaAppointments
+      case 'semana':
+        return semanaAppointments
+      case 'todas':
+        return todasAppointments
+      default:
+        return []
     }
   }
 
@@ -239,10 +259,9 @@ export default function AgendaPage() {
             {userRole === UserRole.ADMIN ? 'Gestión de Citas' : 'Mi Agenda'}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {userRole === UserRole.ADMIN 
-              ? 'Administra todas las citas del sistema' 
-              : 'Gestiona las citas de tus pacientes'
-            }
+            {userRole === UserRole.ADMIN
+              ? 'Administra todas las citas del sistema'
+              : 'Gestiona las citas de tus pacientes'}
           </p>
         </div>
         <div className="mt-4 md:mt-0 flex gap-2">
@@ -284,11 +303,21 @@ export default function AgendaPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value={AppointmentStatus.SCHEDULED}>Programada</SelectItem>
-                  <SelectItem value={AppointmentStatus.CONFIRMED}>Confirmada</SelectItem>
-                  <SelectItem value={AppointmentStatus.IN_PROGRESS}>En Progreso</SelectItem>
-                  <SelectItem value={AppointmentStatus.COMPLETED}>Completada</SelectItem>
-                  <SelectItem value={AppointmentStatus.CANCELLED}>Cancelada</SelectItem>
+                  <SelectItem value={AppointmentStatus.SCHEDULED}>
+                    Programada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.CONFIRMED}>
+                    Confirmada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.IN_PROGRESS}>
+                    En Progreso
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.COMPLETED}>
+                    Completada
+                  </SelectItem>
+                  <SelectItem value={AppointmentStatus.CANCELLED}>
+                    Cancelada
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -300,9 +329,13 @@ export default function AgendaPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las prioridades</SelectItem>
-                  <SelectItem value={AppointmentPriority.EMERGENCY}>Emergencia</SelectItem>
+                  <SelectItem value={AppointmentPriority.EMERGENCY}>
+                    Emergencia
+                  </SelectItem>
                   <SelectItem value={AppointmentPriority.HIGH}>Alta</SelectItem>
-                  <SelectItem value={AppointmentPriority.NORMAL}>Normal</SelectItem>
+                  <SelectItem value={AppointmentPriority.NORMAL}>
+                    Normal
+                  </SelectItem>
                   <SelectItem value={AppointmentPriority.LOW}>Baja</SelectItem>
                 </SelectContent>
               </Select>
@@ -351,13 +384,23 @@ export default function AgendaPage() {
                   <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No hay citas</h3>
                   <p className="text-muted-foreground">
-                    No hay citas programadas para {tab === 'hoy' ? 'hoy' : tab === 'manana' ? 'mañana' : tab === 'semana' ? 'esta semana' : 'mostrar'}
+                    No hay citas programadas para{' '}
+                    {tab === 'hoy'
+                      ? 'hoy'
+                      : tab === 'manana'
+                      ? 'mañana'
+                      : tab === 'semana'
+                      ? 'esta semana'
+                      : 'mostrar'}
                   </p>
                 </CardContent>
               </Card>
             ) : (
               getAppointmentsByTab(tab).map((appointment) => (
-                <Card key={appointment.id} className="hover:shadow-md transition-shadow">
+                <Card
+                  key={appointment.id}
+                  className="hover:shadow-md transition-shadow"
+                >
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                       <div className="flex-1">
@@ -365,12 +408,18 @@ export default function AgendaPage() {
                           <Badge className={getStatusColor(appointment.status)}>
                             {getStatusLabel(appointment.status)}
                           </Badge>
-                          <Badge className={getPriorityColor(appointment.priority)}>
+                          <Badge
+                            className={getPriorityColor(appointment.priority)}
+                          >
                             {getPriorityLabel(appointment.priority)}
                           </Badge>
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
-                            {format(new Date(appointment.date), 'EEEE, d MMMM', { locale: es })}
+                            {format(
+                              new Date(appointment.date),
+                              'EEEE, d MMMM',
+                              { locale: es }
+                            )}
                           </div>
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <Clock className="h-4 w-4" />
@@ -385,16 +434,25 @@ export default function AgendaPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
-                            <span><strong>Paciente:</strong> {appointment.pet?.name || 'N/A'}</span>
+                            <span>
+                              <strong>Paciente:</strong>{' '}
+                              {appointment.pet?.name || 'N/A'}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
-                            <span><strong>Propietario:</strong> {appointment.client?.name || 'N/A'}</span>
+                            <span>
+                              <strong>Propietario:</strong>{' '}
+                              {appointment.client?.name || 'N/A'}
+                            </span>
                           </div>
                           {userRole === UserRole.ADMIN && (
                             <div className="flex items-center gap-2">
                               <Stethoscope className="h-4 w-4 text-muted-foreground" />
-                              <span><strong>Veterinario:</strong> {appointment.veterinarian?.name || 'N/A'}</span>
+                              <span>
+                                <strong>Veterinario:</strong>{' '}
+                                {appointment.veterinarian?.name || 'N/A'}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -410,7 +468,8 @@ export default function AgendaPage() {
                         {appointment.notes && (
                           <div className="mt-3 p-3 bg-blue-50 rounded-md">
                             <p className="text-sm">
-                              <strong>Notas médicas:</strong> {appointment.notes}
+                              <strong>Notas médicas:</strong>{' '}
+                              {appointment.notes}
                             </p>
                           </div>
                         )}
@@ -419,17 +478,27 @@ export default function AgendaPage() {
                       <div className="flex flex-col gap-2 lg:ml-6">
                         {appointment.status === AppointmentStatus.SCHEDULED && (
                           <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleStatusChange(appointment.id, AppointmentStatus.CONFIRMED)}
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleStatusChange(
+                                  appointment.id,
+                                  AppointmentStatus.CONFIRMED
+                                )
+                              }
                             >
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Confirmar
                             </Button>
-                            <Button 
-                              variant="destructive" 
+                            <Button
+                              variant="destructive"
                               size="sm"
-                              onClick={() => handleStatusChange(appointment.id, AppointmentStatus.CANCELLED)}
+                              onClick={() =>
+                                handleStatusChange(
+                                  appointment.id,
+                                  AppointmentStatus.CANCELLED
+                                )
+                              }
                             >
                               <XCircle className="h-4 w-4 mr-2" />
                               Cancelar
@@ -439,9 +508,14 @@ export default function AgendaPage() {
 
                         {appointment.status === AppointmentStatus.CONFIRMED && (
                           <div className="flex gap-2">
-                            <Button 
+                            <Button
                               size="sm"
-                              onClick={() => handleStatusChange(appointment.id, AppointmentStatus.IN_PROGRESS)}
+                              onClick={() =>
+                                handleStatusChange(
+                                  appointment.id,
+                                  AppointmentStatus.IN_PROGRESS
+                                )
+                              }
                             >
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Iniciar
@@ -449,11 +523,17 @@ export default function AgendaPage() {
                           </div>
                         )}
 
-                        {appointment.status === AppointmentStatus.IN_PROGRESS && (
+                        {appointment.status ===
+                          AppointmentStatus.IN_PROGRESS && (
                           <div className="flex gap-2">
-                            <Button 
+                            <Button
                               size="sm"
-                              onClick={() => handleStatusChange(appointment.id, AppointmentStatus.COMPLETED)}
+                              onClick={() =>
+                                handleStatusChange(
+                                  appointment.id,
+                                  AppointmentStatus.COMPLETED
+                                )
+                              }
                             >
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Completar
@@ -462,7 +542,11 @@ export default function AgendaPage() {
                         )}
 
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => openEditDialog(appointment)}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditDialog(appointment)}
+                          >
                             <Edit className="h-4 w-4 mr-2" />
                             Notas
                           </Button>
@@ -487,7 +571,8 @@ export default function AgendaPage() {
           <DialogHeader>
             <DialogTitle>Agregar Notas Médicas</DialogTitle>
             <DialogDescription>
-              Agrega o edita las notas médicas para la cita de {selectedAppointment?.pet?.name || 'la mascota'}
+              Agrega o edita las notas médicas para la cita de{' '}
+              {selectedAppointment?.pet?.name || 'la mascota'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -506,7 +591,12 @@ export default function AgendaPage() {
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={() => selectedAppointment && handleAddNotes(selectedAppointment.id, editNotes)}>
+            <Button
+              onClick={() =>
+                selectedAppointment &&
+                handleAddNotes(selectedAppointment.id, editNotes)
+              }
+            >
               Guardar Notas
             </Button>
           </DialogFooter>

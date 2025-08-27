@@ -43,8 +43,10 @@ export default function CitaDetailPage() {
     try {
       setLoading(true)
       setError(null)
-      const appointmentData = await AppointmentService.getAppointmentById(appointmentId)
-      
+      const appointmentData = await AppointmentService.getAppointmentById(
+        appointmentId
+      )
+
       if (!appointmentData) {
         setError('Cita no encontrada')
         return
@@ -113,19 +115,25 @@ export default function CitaDetailPage() {
   const canCancelAppointment = (appointment: Appointment) => {
     const appointmentDate = new Date(appointment.date)
     const now = new Date()
-    const hoursUntilAppointment = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-    
-    return hoursUntilAppointment > 2 && 
-           (appointment.status === AppointmentStatus.SCHEDULED ||
-            appointment.status === AppointmentStatus.CONFIRMED)
+    const hoursUntilAppointment =
+      (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60)
+
+    return (
+      hoursUntilAppointment > 2 &&
+      (appointment.status === AppointmentStatus.SCHEDULED ||
+        appointment.status === AppointmentStatus.CONFIRMED)
+    )
   }
 
   const handleCancelAppointment = async () => {
     if (!appointment) return
-    
+
     if (confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
       try {
-        await AppointmentService.cancelAppointment(appointment.id, 'Cancelada por el cliente')
+        await AppointmentService.cancelAppointment(
+          appointment.id,
+          'Cancelada por el cliente'
+        )
         router.push('/mis-citas')
       } catch (error) {
         console.error('Error canceling appointment:', error)
@@ -216,9 +224,13 @@ export default function CitaDetailPage() {
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium">
-                      {format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })}
+                      {format(new Date(appointment.date), 'EEEE, d MMMM yyyy', {
+                        locale: es,
+                      })}
                     </p>
-                    <p className="text-sm text-muted-foreground">Fecha de la cita</p>
+                    <p className="text-sm text-muted-foreground">
+                      Fecha de la cita
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -245,9 +257,12 @@ export default function CitaDetailPage() {
                   <User className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold">{appointment.veterinarian?.name}</h3>
+                  <h3 className="text-lg font-semibold">
+                    {appointment.veterinarian?.name}
+                  </h3>
                   <p className="text-muted-foreground mb-2">
-                    {appointment.veterinarian?.specialties?.join(', ') || 'Veterinario General'}
+                    {appointment.veterinarian?.specialties?.join(', ') ||
+                      'Veterinario General'}
                   </p>
                   <div className="space-y-1 text-sm">
                     <div className="flex items-center gap-2">
@@ -275,11 +290,15 @@ export default function CitaDetailPage() {
                   <Heart className="h-8 w-8 text-orange-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold">{appointment.pet?.name}</h3>
+                  <h3 className="text-lg font-semibold">
+                    {appointment.pet?.name}
+                  </h3>
                   <div className="grid grid-cols-2 gap-4 mt-2 text-sm">
                     <div>
                       <span className="text-muted-foreground">Especie:</span>
-                      <p className="font-medium">{appointment.pet?.species || 'No especificado'}</p>
+                      <p className="font-medium">
+                        {appointment.pet?.species || 'No especificado'}
+                      </p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Raza:</span>
@@ -309,11 +328,13 @@ export default function CitaDetailPage() {
                 <h4 className="font-medium mb-2">Motivo:</h4>
                 <p className="text-muted-foreground">{appointment.reason}</p>
               </div>
-              
+
               {appointment.symptoms && (
                 <div>
                   <h4 className="font-medium mb-2">Síntomas:</h4>
-                  <p className="text-muted-foreground">{appointment.symptoms}</p>
+                  <p className="text-muted-foreground">
+                    {appointment.symptoms}
+                  </p>
                 </div>
               )}
 
@@ -350,8 +371,8 @@ export default function CitaDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {canCancelAppointment(appointment) && (
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   className="w-full"
                   onClick={handleCancelAppointment}
                 >
@@ -359,7 +380,7 @@ export default function CitaDetailPage() {
                   Cancelar Cita
                 </Button>
               )}
-              
+
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/servicios">
                   <Calendar className="h-4 w-4 mr-2" />
@@ -383,12 +404,22 @@ export default function CitaDetailPage() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Costo del servicio:</span>
-                  <span className="font-medium">S/. {appointment.totalCost?.toFixed(2)}</span>
+                  <span className="font-medium">
+                    S/. {appointment.totalCost?.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Estado de pago:</span>
-                  <Badge variant={appointment.paymentStatus === 'paid' ? 'default' : 'secondary'}>
-                    {appointment.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}
+                  <Badge
+                    variant={
+                      appointment.paymentStatus === 'paid'
+                        ? 'default'
+                        : 'secondary'
+                    }
+                  >
+                    {appointment.paymentStatus === 'paid'
+                      ? 'Pagado'
+                      : 'Pendiente'}
                   </Badge>
                 </div>
                 <Separator />

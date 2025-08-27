@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -34,13 +34,7 @@ export default function MisCitasPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState('proximas')
 
-  useEffect(() => {
-    if (isLoaded && user) {
-      loadAppointments()
-    }
-  }, [isLoaded, user])
-
-  const loadAppointments = async () => {
+  const loadAppointments = useCallback(async () => {
     try {
       setLoading(true)
       // Obtener citas del usuario actual
@@ -53,7 +47,13 @@ export default function MisCitasPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id])
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      loadAppointments()
+    }
+  }, [isLoaded, user, loadAppointments])
 
   const getStatusColor = (status: AppointmentStatus) => {
     const colors = {
@@ -96,14 +96,18 @@ export default function MisCitasPage() {
 
   const filterAppointments = (appointments: Appointment[], filter: string) => {
     const now = new Date()
-    const filtered = appointments.filter(apt => {
+    const filtered = appointments.filter((apt) => {
       const appointmentDate = new Date(apt.date)
-      
+
       switch (filter) {
         case 'proximas':
-          return appointmentDate >= now && apt.status !== AppointmentStatus.CANCELLED
+          return (
+            appointmentDate >= now && apt.status !== AppointmentStatus.CANCELLED
+          )
         case 'pasadas':
-          return appointmentDate < now || apt.status === AppointmentStatus.COMPLETED
+          return (
+            appointmentDate < now || apt.status === AppointmentStatus.COMPLETED
+          )
         case 'canceladas':
           return apt.status === AppointmentStatus.CANCELLED
         default:
@@ -112,10 +116,13 @@ export default function MisCitasPage() {
     })
 
     if (searchQuery) {
-      return filtered.filter(apt => 
-        apt.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        apt.veterinarian?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        apt.service?.name.toLowerCase().includes(searchQuery.toLowerCase())
+      return filtered.filter(
+        (apt) =>
+          apt.reason?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          apt.veterinarian?.name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          apt.service?.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
@@ -125,17 +132,23 @@ export default function MisCitasPage() {
   const canCancelAppointment = (appointment: Appointment) => {
     const appointmentDate = new Date(appointment.date)
     const now = new Date()
-    const hoursUntilAppointment = (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-    
-    return hoursUntilAppointment > 2 && 
-           appointment.status === AppointmentStatus.SCHEDULED ||
-           appointment.status === AppointmentStatus.CONFIRMED
+    const hoursUntilAppointment =
+      (appointmentDate.getTime() - now.getTime()) / (1000 * 60 * 60)
+
+    return (
+      (hoursUntilAppointment > 2 &&
+        appointment.status === AppointmentStatus.SCHEDULED) ||
+      appointment.status === AppointmentStatus.CONFIRMED
+    )
   }
 
   const handleCancelAppointment = async (appointmentId: string) => {
     if (confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
       try {
-        await AppointmentService.cancelAppointment(appointmentId, 'Cancelada por el cliente')
+        await AppointmentService.cancelAppointment(
+          appointmentId,
+          'Cancelada por el cliente'
+        )
         loadAppointments() // Recargar la lista
       } catch (error) {
         console.error('Error canceling appointment:', error)
@@ -236,7 +249,9 @@ export default function MisCitasPage() {
             <Card>
               <CardContent className="text-center py-8">
                 <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No tienes citas próximas</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  No tienes citas próximas
+                </h3>
                 <p className="text-muted-foreground mb-4">
                   ¡Agenda una cita con nuestros veterinarios especializados!
                 </p>
@@ -250,18 +265,27 @@ export default function MisCitasPage() {
             </Card>
           ) : (
             proximasCitas.map((appointment) => (
-              <Card key={appointment.id} className="hover:shadow-md transition-shadow">
+              <Card
+                key={appointment.id}
+                className="hover:shadow-md transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <Badge className={getStatusColor(appointment.status)}>
                           {getStatusIcon(appointment.status)}
-                          <span className="ml-1">{getStatusLabel(appointment.status)}</span>
+                          <span className="ml-1">
+                            {getStatusLabel(appointment.status)}
+                          </span>
                         </Badge>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          {format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })}
+                          {format(
+                            new Date(appointment.date),
+                            'EEEE, d MMMM yyyy',
+                            { locale: es }
+                          )}
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Clock className="h-4 w-4" />
@@ -300,12 +324,14 @@ export default function MisCitasPage() {
                           Ver Detalle
                         </Link>
                       </Button>
-                      
+
                       {canCancelAppointment(appointment) && (
-                        <Button 
-                          variant="destructive" 
+                        <Button
+                          variant="destructive"
                           size="sm"
-                          onClick={() => handleCancelAppointment(appointment.id)}
+                          onClick={() =>
+                            handleCancelAppointment(appointment.id)
+                          }
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Cancelar
@@ -325,7 +351,9 @@ export default function MisCitasPage() {
             <Card>
               <CardContent className="text-center py-8">
                 <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No tienes citas pasadas</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  No tienes citas pasadas
+                </h3>
                 <p className="text-muted-foreground">
                   Aquí aparecerán tus citas completadas
                 </p>
@@ -340,11 +368,17 @@ export default function MisCitasPage() {
                       <div className="flex items-center gap-3 mb-3">
                         <Badge className={getStatusColor(appointment.status)}>
                           {getStatusIcon(appointment.status)}
-                          <span className="ml-1">{getStatusLabel(appointment.status)}</span>
+                          <span className="ml-1">
+                            {getStatusLabel(appointment.status)}
+                          </span>
                         </Badge>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          {format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })}
+                          {format(
+                            new Date(appointment.date),
+                            'EEEE, d MMMM yyyy',
+                            { locale: es }
+                          )}
                         </div>
                       </div>
 
@@ -379,7 +413,9 @@ export default function MisCitasPage() {
             <Card>
               <CardContent className="text-center py-8">
                 <XCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No tienes citas canceladas</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  No tienes citas canceladas
+                </h3>
                 <p className="text-muted-foreground">
                   Aquí aparecerán las citas que hayas cancelado
                 </p>
@@ -394,11 +430,17 @@ export default function MisCitasPage() {
                       <div className="flex items-center gap-3 mb-3">
                         <Badge className={getStatusColor(appointment.status)}>
                           {getStatusIcon(appointment.status)}
-                          <span className="ml-1">{getStatusLabel(appointment.status)}</span>
+                          <span className="ml-1">
+                            {getStatusLabel(appointment.status)}
+                          </span>
                         </Badge>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          {format(new Date(appointment.date), 'EEEE, d MMMM yyyy', { locale: es })}
+                          {format(
+                            new Date(appointment.date),
+                            'EEEE, d MMMM yyyy',
+                            { locale: es }
+                          )}
                         </div>
                       </div>
 
