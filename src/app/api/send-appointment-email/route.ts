@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { EmailService } from '@/lib/email';
+import { EMAIL_CONFIG } from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,12 +17,15 @@ export async function POST(request: NextRequest) {
     let success = false;
 
     switch (type) {
+      case EMAIL_CONFIG.TEMPLATES.APPOINTMENT_CONFIRMATION:
       case 'confirmation':
         success = await EmailService.sendAppointmentConfirmation(appointment, userEmail);
         break;
+      case EMAIL_CONFIG.TEMPLATES.APPOINTMENT_REMINDER:
       case 'reminder':
         success = await EmailService.sendAppointmentReminder(appointment, userEmail);
         break;
+      case EMAIL_CONFIG.TEMPLATES.APPOINTMENT_CANCELLATION:
       case 'cancellation':
         success = await EmailService.sendAppointmentCancellation(appointment, userEmail);
         break;

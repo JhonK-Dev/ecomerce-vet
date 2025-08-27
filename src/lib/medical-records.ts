@@ -12,6 +12,13 @@ import {
   PetFilters,
   MedicalStats
 } from '@/types/medical-records';
+import { 
+  SYSTEM_CONFIG, 
+  DEMO_USERS, 
+  DEMO_PETS, 
+  MEDICATIONS,
+  HELPERS
+} from './constants';
 
 // Datos simulados - En producción usar base de datos real
 // Función para cargar datos del localStorage
@@ -64,6 +71,7 @@ const saveToStorage = <T>(key: string, data: T[]): void => {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(key, JSON.stringify(data));
+    console.log(`✅ ${key} guardado en localStorage:`, data.length, 'elementos');
   } catch (error) {
     console.error(`Error saving ${key} to localStorage:`, error);
   }
@@ -138,7 +146,7 @@ const defaultMedicalRecords: MedicalRecord[] = [
         instructions: 'Administrar con la comida',
         startDate: new Date('2024-01-15'),
         isActive: true,
-        prescribedBy: 'vet_001'
+        prescribedBy: DEMO_USERS.VETERINARIANS[0].id
       }
     ],
     vaccinations: [
@@ -177,7 +185,7 @@ const defaultMedicalRecords: MedicalRecord[] = [
   {
     id: '2',
     petId: '2',
-    veterinarianId: 'vet_002',
+    veterinarianId: DEMO_USERS.VETERINARIANS[1].id,
     date: new Date('2024-01-20'),
     type: MedicalRecordType.CONSULTATION,
     title: 'Consulta por Vómitos',
@@ -195,7 +203,7 @@ const defaultMedicalRecords: MedicalRecord[] = [
         startDate: new Date('2024-01-20'),
         endDate: new Date('2024-01-27'),
         isActive: false,
-        prescribedBy: 'vet_002'
+        prescribedBy: DEMO_USERS.VETERINARIANS[1].id
       }
     ],
     vaccinations: [],
@@ -230,7 +238,7 @@ const defaultMedicalAlerts: MedicalAlert[] = [
     dueDate: new Date('2024-03-15'),
     isCompleted: false,
     priority: AlertPriority.HIGH,
-    createdBy: 'vet_001',
+    createdBy: DEMO_USERS.VETERINARIANS[0].id,
     assignedTo: 'user_123',
     createdAt: new Date('2024-02-15')
   },
@@ -243,7 +251,7 @@ const defaultMedicalAlerts: MedicalAlert[] = [
     dueDate: new Date('2024-01-23'),
     isCompleted: false,
     priority: AlertPriority.MEDIUM,
-    createdBy: 'vet_002',
+    createdBy: DEMO_USERS.VETERINARIANS[1].id,
     assignedTo: 'user_456',
     createdAt: new Date('2024-01-20')
   }

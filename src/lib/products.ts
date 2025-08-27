@@ -1,17 +1,21 @@
 // Gestión de productos para el módulo E-commerce
 import { Product, ProductCategory, ProductFilters, PaginationParams, ApiResponse } from '@/types';
+import { 
+  DEMO_PRODUCTS, 
+  HELPERS
+} from './constants';
 
-// Base de datos simulada de productos
+// Base de datos simulada de productos usando constantes
 const products: Product[] = [
   // Alimentos
   {
-    id: '1',
+    id: HELPERS.generateId('prod_'),
     name: 'Royal Canin Adult Medium',
     description: 'Alimento completo y balanceado para perros adultos de raza mediana (11-25kg). Fórmula especialmente diseñada para mantener la salud digestiva y el peso ideal.',
     price: 89.90,
     discountPrice: 79.90,
     category: ProductCategory.FOOD,
-    brand: 'Royal Canin',
+    brand: DEMO_PRODUCTS.BRANDS[0],
     images: ['/products/royal-canin-medium.jpg', '/products/royal-canin-medium-2.jpg'],
     stock: 25,
     isActive: true,
@@ -27,12 +31,12 @@ const products: Product[] = [
     updatedAt: new Date('2024-01-20')
   },
   {
-    id: '2',
+    id: HELPERS.generateId('prod_'),
     name: 'Hill\'s Science Diet Kitten',
     description: 'Nutrición científicamente formulada para gatitos en crecimiento. Con DHA para el desarrollo cerebral y visual, y antioxidantes para un sistema inmune fuerte.',
     price: 65.50,
     category: ProductCategory.FOOD,
-    brand: 'Hill\'s',
+    brand: DEMO_PRODUCTS.BRANDS[1],
     images: ['/products/hills-kitten.jpg'],
     stock: 18,
     isActive: true,
@@ -48,13 +52,13 @@ const products: Product[] = [
     updatedAt: new Date('2024-01-18')
   },
   {
-    id: '3',
+    id: HELPERS.generateId('prod_'),
     name: 'Pro Plan Sensitive Skin',
     description: 'Alimento especializado para perros con piel sensible. Con salmón como fuente principal de proteína y ácidos grasos omega para una piel saludable.',
     price: 95.00,
     discountPrice: 85.50,
     category: ProductCategory.FOOD,
-    brand: 'Pro Plan',
+    brand: DEMO_PRODUCTS.BRANDS[2],
     images: ['/products/proplan-sensitive.jpg'],
     stock: 12,
     isActive: true,
@@ -71,12 +75,12 @@ const products: Product[] = [
 
   // Medicamentos
   {
-    id: '4',
+    id: HELPERS.generateId('prod_'),
     name: 'Bravecto Antipulgas y Garrapatas',
     description: 'Protección de larga duración contra pulgas y garrapatas. Una sola dosis protege por 12 semanas. Para perros de 10-20kg.',
     price: 145.00,
     category: ProductCategory.MEDICINE,
-    brand: 'MSD',
+    brand: DEMO_PRODUCTS.BRANDS[6],
     images: ['/products/bravecto.jpg'],
     stock: 8,
     isActive: true,
