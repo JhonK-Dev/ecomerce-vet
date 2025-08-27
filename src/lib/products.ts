@@ -1,9 +1,7 @@
 // Gestión de productos para el módulo E-commerce
 import { Product, ProductCategory, ProductFilters, PaginationParams, ApiResponse } from '@/types';
 import { 
-  SYSTEM_CONFIG, 
   DEMO_PRODUCTS, 
-  PRICING,
   HELPERS
 } from './constants';
 

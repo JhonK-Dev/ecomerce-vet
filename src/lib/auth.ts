@@ -1,6 +1,6 @@
 // Sistema de autenticación para Ecommerce Vet
 import { User, UserRole } from '@/types';
-import { DEMO_USERS, SYSTEM_CONFIG, HELPERS, ROLE_CONFIG } from './constants';
+import { DEMO_USERS, SYSTEM_CONFIG, HELPERS } from './constants';
 
 // Simulación de base de datos de usuarios usando constantes
 const users: User[] = [
@@ -21,7 +21,7 @@ const users: User[] = [
     name: DEMO_USERS.VETERINARIANS[0].name,
     role: UserRole.VETERINARIAN,
     avatar: '/avatars/vet.jpg',
-    phone: DEMO_USERS.VETERINARIANS[0].phone || '+51 999 777 666',
+    phone: '+51 999 777 666', // Teléfono por defecto para veterinarios
     address: 'Clínica Veterinaria Central',
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date()

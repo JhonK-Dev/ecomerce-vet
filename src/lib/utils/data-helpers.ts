@@ -32,7 +32,7 @@ export const DataHelpers = {
   // Obtener veterinario por especialidad
   getVeterinariansBySpecialty: (specialty: string) => {
     return DEMO_USERS.VETERINARIANS.filter(vet => 
-      vet.specialties.includes(specialty)
+      (vet.specialties as readonly string[]).includes(specialty)
     );
   },
 
@@ -170,7 +170,7 @@ export const DataHelpers = {
   },
 
   // Filtrar datos por término de búsqueda
-  filterBySearchTerm: <T extends Record<string, any>>(
+  filterBySearchTerm: <T extends Record<string, unknown>>(
     items: T[],
     searchTerm: string,
     searchFields: (keyof T)[]
@@ -187,7 +187,7 @@ export const DataHelpers = {
   },
 
   // Ordenar array por campo
-  sortBy: <T extends Record<string, any>>(
+  sortBy: <T extends Record<string, unknown>>(
     items: T[],
     field: keyof T,
     direction: 'asc' | 'desc' = 'asc'
@@ -203,12 +203,12 @@ export const DataHelpers = {
   },
 
   // Agrupar array por campo
-  groupBy: <T extends Record<string, any>>(
+  groupBy: <T extends Record<string, unknown>>(
     items: T[],
     field: keyof T
   ): Record<string, T[]> => {
     return items.reduce((groups, item) => {
-      const key = item[field].toString();
+      const key = String(item[field]);
       if (!groups[key]) {
         groups[key] = [];
       }
@@ -218,7 +218,7 @@ export const DataHelpers = {
   },
 
   // Obtener elementos únicos por campo
-  uniqueBy: <T extends Record<string, any>>(
+  uniqueBy: <T extends Record<string, unknown>>(
     items: T[],
     field: keyof T
   ): T[] => {
