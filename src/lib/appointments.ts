@@ -9,12 +9,20 @@ import {
 } from '@/types/veterinary';
 import { VeterinarianService } from './veterinarians';
 import { AuthService } from './auth';
+import { 
+  SYSTEM_CONFIG, 
+  DEMO_USERS, 
+  DEMO_PETS, 
+  VETERINARY_SERVICES,
+  EMAIL_CONFIG,
+  HELPERS
+} from './constants';
 
 // Datos simulados de citas - con persistencia en localStorage
 const getAppointmentsFromStorage = (): Appointment[] => {
   if (typeof window === 'undefined') return [];
   try {
-    const stored = localStorage.getItem('ecommercevet_appointments');
+    const stored = localStorage.getItem(SYSTEM_CONFIG.STORAGE_KEYS.APPOINTMENTS);
     if (stored) {
       const parsed = JSON.parse(stored);
       // Convertir strings de fecha de vuelta a Date objects
@@ -35,7 +43,7 @@ const getAppointmentsFromStorage = (): Appointment[] => {
 const saveAppointmentsToStorage = (appointments: Appointment[]) => {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem('ecommercevet_appointments', JSON.stringify(appointments));
+    localStorage.setItem(SYSTEM_CONFIG.STORAGE_KEYS.APPOINTMENTS, JSON.stringify(appointments));
     console.log('✅ Citas guardadas en localStorage:', appointments.length);
   } catch (error) {
     console.error('Error saving appointments to storage:', error);
@@ -45,10 +53,10 @@ const saveAppointmentsToStorage = (appointments: Appointment[]) => {
 const getDefaultAppointments = (): Appointment[] => [
   {
     id: '1',
-    clientId: 'client_001',
-    petId: 'pet_001',
+    clientId: DEMO_USERS.CLIENTS[0].id,
+    petId: DEMO_PETS[0].id,
     veterinarianId: '1',
-    serviceId: '1',
+    serviceId: VETERINARY_SERVICES[0].id,
     date: new Date(),
     startTime: '09:00',
     endTime: '09:30',
@@ -60,21 +68,28 @@ const getDefaultAppointments = (): Appointment[] => [
     followUpRequired: false,
     remindersSent: [ReminderType.EMAIL],
     paymentStatus: PaymentStatus.PENDING,
-    totalCost: 80.00,
+    totalCost: VETERINARY_SERVICES[0].price,
     createdAt: new Date('2024-12-15'),
     updatedAt: new Date(),
     // Relaciones para la UI
-    pet: { id: 'pet_001', name: 'Luna' },
-    client: { id: 'client_001', name: 'María García', email: 'maria@example.com' },
-    veterinarian: { id: '1', name: 'Dr. Carlos Ruiz' },
-    service: { id: '1', name: 'Consulta General' }
+    pet: { id: DEMO_PETS[0].id, name: DEMO_PETS[0].name },
+    client: { 
+      id: DEMO_USERS.CLIENTS[0].id, 
+      name: DEMO_USERS.CLIENTS[0].name, 
+      email: DEMO_USERS.CLIENTS[0].email 
+    },
+    veterinarian: { id: '1', name: DEMO_USERS.VETERINARIANS[0].name },
+    service: { 
+      id: VETERINARY_SERVICES[0].id, 
+      name: VETERINARY_SERVICES[0].name 
+    }
   },
   {
     id: '2',
-    clientId: 'client_002',
-    petId: 'pet_002',
+    clientId: DEMO_USERS.CLIENTS[1].id,
+    petId: DEMO_PETS[1].id,
     veterinarianId: '2',
-    serviceId: '2',
+    serviceId: VETERINARY_SERVICES[1].id,
     date: new Date(Date.now() + 24 * 60 * 60 * 1000), // Mañana
     startTime: '10:00',
     endTime: '10:20',
@@ -86,14 +101,22 @@ const getDefaultAppointments = (): Appointment[] => [
     followUpDate: new Date('2025-01-21'),
     remindersSent: [],
     paymentStatus: PaymentStatus.PENDING,
-    totalCost: 120.00,
+    totalCost: VETERINARY_SERVICES[1].price,
     createdAt: new Date('2024-12-16'),
     updatedAt: new Date(),
     // Relaciones para la UI
-    pet: { id: 'pet_002', name: 'Max', species: 'CAT' },
-    client: { id: 'client_002', name: 'Juan Pérez', email: 'juan@example.com' },
-    veterinarian: { id: '2', name: 'Dra. Ana Martínez', specialties: ['GENERAL'] },
-    service: { id: '2', name: 'Vacunación', price: 120 }
+    pet: { id: DEMO_PETS[1].id, name: DEMO_PETS[1].name, species: 'CAT' },
+    client: { 
+      id: DEMO_USERS.CLIENTS[1].id, 
+      name: DEMO_USERS.CLIENTS[1].name, 
+      email: DEMO_USERS.CLIENTS[1].email 
+    },
+    veterinarian: { id: '2', name: DEMO_USERS.VETERINARIANS[1].name, specialties: ['GENERAL'] },
+    service: { 
+      id: VETERINARY_SERVICES[1].id, 
+      name: VETERINARY_SERVICES[1].name, 
+      price: VETERINARY_SERVICES[1].price 
+    }
   }
 ];
 
@@ -159,7 +182,7 @@ export class AppointmentService {
         setTimeout(() => {
           const newAppointment: Appointment = {
             ...appointmentData,
-            id: Date.now().toString(), // ID único basado en timestamp
+            id: HELPERS.generateId('apt_'),
             status: AppointmentStatus.SCHEDULED,
             remindersSent: [],
             createdAt: new Date(),
@@ -177,7 +200,7 @@ export class AppointmentService {
           this.sendConfirmationNotification(newAppointment);
           
           resolve(newAppointment);
-        }, 500);
+        }, SYSTEM_CONFIG.DELAYS.API_SIMULATION);
       } catch (error) {
         console.error('❌ Error en createAppointment:', error);
         reject(error);
@@ -308,7 +331,7 @@ export class AppointmentService {
   // Enviar notificaciones (usando API route del servidor)
   private static async sendConfirmationNotification(appointment: Appointment): Promise<void> {
     const user = AuthService.getUserById(appointment.clientId);
-    const userEmail = user ? user.email : 'kerrymamani@gmail.com';
+    const userEmail = user ? user.email : EMAIL_CONFIG.FALLBACK_EMAIL;
 
     try {
       console.log('📧 Enviando email de confirmación a:', userEmail);
@@ -320,7 +343,7 @@ export class AppointmentService {
         body: JSON.stringify({
           appointment,
           userEmail,
-          type: 'confirmation'
+          type: EMAIL_CONFIG.TEMPLATES.APPOINTMENT_CONFIRMATION
         }),
       });
     } catch (error) {

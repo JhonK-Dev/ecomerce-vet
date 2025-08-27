@@ -1,10 +1,11 @@
 // Sistema de autenticación para Ecommerce Vet
 import { User, UserRole } from '@/types';
+import { DEMO_USERS, SYSTEM_CONFIG, HELPERS, ROLE_CONFIG } from './constants';
 
-// Simulación de base de datos de usuarios (en producción usar una DB real)
+// Simulación de base de datos de usuarios usando constantes
 const users: User[] = [
   {
-    id: '1',
+    id: HELPERS.generateId('admin_'),
     email: 'admin@ecommercevet.com',
     name: 'Administrador',
     role: UserRole.ADMIN,
@@ -15,24 +16,24 @@ const users: User[] = [
     updatedAt: new Date()
   },
   {
-    id: '2',
-    email: 'veterinario@ecommercevet.com',
-    name: 'Dr. María González',
+    id: DEMO_USERS.VETERINARIANS[0].id,
+    email: DEMO_USERS.VETERINARIANS[0].email,
+    name: DEMO_USERS.VETERINARIANS[0].name,
     role: UserRole.VETERINARIAN,
     avatar: '/avatars/vet.jpg',
-    phone: '+51 999 777 666',
+    phone: DEMO_USERS.VETERINARIANS[0].phone || '+51 999 777 666',
     address: 'Clínica Veterinaria Central',
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date()
   },
   {
-    id: '3',
-    email: 'cliente@example.com',
-    name: 'Juan Pérez',
+    id: DEMO_USERS.CLIENTS[0].id,
+    email: DEMO_USERS.CLIENTS[0].email,
+    name: DEMO_USERS.CLIENTS[0].name,
     role: UserRole.CLIENT,
     avatar: '/avatars/client.jpg',
-    phone: '+51 999 666 555',
-    address: 'Jr. Los Olivos 456, San Isidro',
+    phone: DEMO_USERS.CLIENTS[0].phone,
+    address: DEMO_USERS.CLIENTS[0].address,
     createdAt: new Date('2024-02-01'),
     updatedAt: new Date()
   }
@@ -52,7 +53,7 @@ export class AuthService {
       
       // Guardar en localStorage (en producción usar cookies seguras)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('auth_token', token);
+        localStorage.setItem(SYSTEM_CONFIG.STORAGE_KEYS.USER_PREFERENCES, token);
         localStorage.setItem('user', JSON.stringify(user));
       }
       

@@ -36,6 +36,7 @@ import { VeterinarianService } from '@/lib/veterinarians'
 import { AppointmentService } from '@/lib/appointments'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { DEMO_PETS, UI_CONFIG, SYSTEM_CONFIG } from '@/lib/constants'
 
 interface AppointmentBookingProps {
   service: VeterinaryService
@@ -64,9 +65,9 @@ export function AppointmentBooking({
   const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([])
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
   const [pets] = useState([
-    { id: 'pet1', name: 'Max', type: 'Perro', breed: 'Golden Retriever' },
-    { id: 'pet2', name: 'Luna', type: 'Gato', breed: 'Persa' },
-    { id: 'pet3', name: 'Rocky', type: 'Perro', breed: 'Bulldog' },
+    { id: DEMO_PETS[0].id, name: DEMO_PETS[0].name, type: DEMO_PETS[0].species, breed: DEMO_PETS[0].breed },
+    { id: DEMO_PETS[1].id, name: DEMO_PETS[1].name, type: DEMO_PETS[1].species, breed: DEMO_PETS[1].breed },
+    { id: DEMO_PETS[2].id, name: DEMO_PETS[2].name, type: DEMO_PETS[2].species, breed: DEMO_PETS[2].breed },
   ])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>('')
@@ -85,7 +86,7 @@ export function AppointmentBooking({
         )
         setVeterinarians(compatibleVets)
       } catch {
-        setError('Error al cargar veterinarios')
+        setError(UI_CONFIG.MESSAGES.ERROR_GENERIC)
       }
     }
 
@@ -107,7 +108,7 @@ export function AppointmentBooking({
         )
         setAvailableSlots(slots)
       } catch {
-        setError('Error al cargar horarios disponibles')
+        setError(UI_CONFIG.MESSAGES.ERROR_GENERIC)
       } finally {
         setIsLoading(false)
       }
@@ -126,7 +127,7 @@ export function AppointmentBooking({
       !selectedVeterinarian ||
       !selectedPet
     ) {
-      setError('Por favor completa todos los campos requeridos')
+      setError(UI_CONFIG.MESSAGES.ERROR_GENERIC)
       return
     }
 
@@ -169,7 +170,7 @@ export function AppointmentBooking({
 
       setStep(4) // Mostrar confirmación
     } catch {
-      setError('Error al crear la cita. Por favor intenta nuevamente.')
+      setError(UI_CONFIG.MESSAGES.ERROR_GENERIC)
     } finally {
       setIsLoading(false)
     }
