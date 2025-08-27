@@ -6,16 +6,22 @@ import {
   ServiceFilters,
   PaginationParams 
 } from '@/types/veterinary';
+import { 
+  SYSTEM_CONFIG, 
+  VETERINARY_SERVICES, 
+  SCHEDULE_CONFIG,
+  HELPERS
+} from './constants';
 
-// Datos simulados de servicios veterinarios
+// Datos simulados de servicios veterinarios usando constantes
 const veterinaryServices: VeterinaryService[] = [
   {
-    id: '1',
-    name: 'Consulta General',
-    description: 'Examen físico completo, evaluación de salud general y asesoramiento preventivo.',
+    id: VETERINARY_SERVICES[0].id,
+    name: VETERINARY_SERVICES[0].name,
+    description: VETERINARY_SERVICES[0].description,
     category: ServiceCategory.CONSULTATION,
-    duration: 30,
-    price: 80.00,
+    duration: VETERINARY_SERVICES[0].duration,
+    price: VETERINARY_SERVICES[0].price,
     isActive: true,
     requiresPreparation: false,
     image: '/services/consultation.jpg',
@@ -24,12 +30,12 @@ const veterinaryServices: VeterinaryService[] = [
     updatedAt: new Date()
   },
   {
-    id: '2',
-    name: 'Vacunación Múltiple',
-    description: 'Aplicación de vacunas esenciales según el calendario de vacunación.',
+    id: VETERINARY_SERVICES[1].id,
+    name: VETERINARY_SERVICES[1].name,
+    description: VETERINARY_SERVICES[1].description,
     category: ServiceCategory.VACCINATION,
-    duration: 20,
-    price: 120.00,
+    duration: VETERINARY_SERVICES[1].duration,
+    price: VETERINARY_SERVICES[1].price,
     isActive: true,
     requiresPreparation: true,
     preparationInstructions: 'La mascota debe estar en ayunas 2 horas antes. Traer cartilla de vacunación.',
