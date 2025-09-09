@@ -4,28 +4,72 @@ import {
   VeterinarianSpecialty, 
   WorkingHours
 } from '@/types/veterinary';
+import { 
+  SYSTEM_CONFIG, 
+  DEMO_USERS, 
+  SCHEDULE_CONFIG,
+  HELPERS
+} from './constants';
 
-// Horario de trabajo por defecto
+// Horario de trabajo por defecto usando constantes
 const defaultWorkingHours: WorkingHours = {
-  monday: { isWorking: true, startTime: '08:00', endTime: '18:00', breakStart: '12:00', breakEnd: '13:00' },
-  tuesday: { isWorking: true, startTime: '08:00', endTime: '18:00', breakStart: '12:00', breakEnd: '13:00' },
-  wednesday: { isWorking: true, startTime: '08:00', endTime: '18:00', breakStart: '12:00', breakEnd: '13:00' },
-  thursday: { isWorking: true, startTime: '08:00', endTime: '18:00', breakStart: '12:00', breakEnd: '13:00' },
-  friday: { isWorking: true, startTime: '08:00', endTime: '18:00', breakStart: '12:00', breakEnd: '13:00' },
-  saturday: { isWorking: true, startTime: '08:00', endTime: '14:00' },
-  sunday: { isWorking: false, startTime: '', endTime: '' }
+  monday: { 
+    isWorking: true, 
+    startTime: SCHEDULE_CONFIG.BUSINESS_HOURS.MONDAY.start, 
+    endTime: SCHEDULE_CONFIG.BUSINESS_HOURS.MONDAY.end, 
+    breakStart: '12:00', 
+    breakEnd: '13:00' 
+  },
+  tuesday: { 
+    isWorking: true, 
+    startTime: SCHEDULE_CONFIG.BUSINESS_HOURS.TUESDAY.start, 
+    endTime: SCHEDULE_CONFIG.BUSINESS_HOURS.TUESDAY.end, 
+    breakStart: '12:00', 
+    breakEnd: '13:00' 
+  },
+  wednesday: { 
+    isWorking: true, 
+    startTime: SCHEDULE_CONFIG.BUSINESS_HOURS.WEDNESDAY.start, 
+    endTime: SCHEDULE_CONFIG.BUSINESS_HOURS.WEDNESDAY.end, 
+    breakStart: '12:00', 
+    breakEnd: '13:00' 
+  },
+  thursday: { 
+    isWorking: true, 
+    startTime: SCHEDULE_CONFIG.BUSINESS_HOURS.THURSDAY.start, 
+    endTime: SCHEDULE_CONFIG.BUSINESS_HOURS.THURSDAY.end, 
+    breakStart: '12:00', 
+    breakEnd: '13:00' 
+  },
+  friday: { 
+    isWorking: true, 
+    startTime: SCHEDULE_CONFIG.BUSINESS_HOURS.FRIDAY.start, 
+    endTime: SCHEDULE_CONFIG.BUSINESS_HOURS.FRIDAY.end, 
+    breakStart: '12:00', 
+    breakEnd: '13:00' 
+  },
+  saturday: { 
+    isWorking: true, 
+    startTime: SCHEDULE_CONFIG.BUSINESS_HOURS.SATURDAY.start, 
+    endTime: SCHEDULE_CONFIG.BUSINESS_HOURS.SATURDAY.end 
+  },
+  sunday: { 
+    isWorking: true, 
+    startTime: SCHEDULE_CONFIG.BUSINESS_HOURS.SUNDAY.start, 
+    endTime: SCHEDULE_CONFIG.BUSINESS_HOURS.SUNDAY.end 
+  }
 };
 
-// Datos simulados de veterinarios
+// Datos simulados de veterinarios usando constantes
 const veterinarians: Veterinarian[] = [
   {
     id: '1',
-    userId: 'vet_1', // ID de Clerk
-    name: 'Dr. María González',
-    email: 'maria.gonzalez@ecommercevet.com',
+    userId: DEMO_USERS.VETERINARIANS[0].clerkId,
+    name: DEMO_USERS.VETERINARIANS[0].name,
+    email: DEMO_USERS.VETERINARIANS[0].email,
     phone: '+51 999 777 666',
     specialties: [VeterinarianSpecialty.GENERAL, VeterinarianSpecialty.SURGERY],
-    licenseNumber: 'VET-001-2020',
+    licenseNumber: DEMO_USERS.VETERINARIANS[0].license,
     experience: 8,
     bio: 'Veterinaria especializada en cirugía general con más de 8 años de experiencia. Graduada de la Universidad Nacional Mayor de San Marcos.',
     avatar: '/avatars/vet-maria.jpg',
@@ -36,12 +80,12 @@ const veterinarians: Veterinarian[] = [
   },
   {
     id: '2',
-    userId: 'vet_2',
+    userId: DEMO_USERS.VETERINARIANS[1].clerkId,
     name: 'Dr. Carlos Mendoza',
     email: 'carlos.mendoza@ecommercevet.com',
     phone: '+51 999 888 777',
     specialties: [VeterinarianSpecialty.CARDIOLOGY, VeterinarianSpecialty.GENERAL],
-    licenseNumber: 'VET-002-2019',
+    licenseNumber: DEMO_USERS.VETERINARIANS[1].license,
     experience: 12,
     bio: 'Especialista en cardiología veterinaria con certificación internacional. Experto en diagnóstico y tratamiento de enfermedades cardíacas.',
     avatar: '/avatars/vet-carlos.jpg',

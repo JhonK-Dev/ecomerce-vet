@@ -117,6 +117,8 @@ export function EditPetDialog({
       if (updatedPet) {
         onPetUpdated?.(updatedPet)
         setOpen(false)
+        // Forzar recarga de la página para mostrar cambios
+        window.location.reload()
       }
     } catch (error) {
       console.error('Error updating pet:', error)

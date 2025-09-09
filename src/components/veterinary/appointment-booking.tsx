@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-// import { Textarea } from '@/components/ui/textarea'; // Removed: module not found
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ import { VeterinarianService } from '@/lib/veterinarians'
 import { AppointmentService } from '@/lib/appointments'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { DEMO_PETS, UI_CONFIG, SYSTEM_CONFIG } from '@/lib/constants'
 
 interface AppointmentBookingProps {
   service: VeterinaryService
@@ -47,6 +49,7 @@ export function AppointmentBooking({
   onBookingComplete,
   onCancel,
 }: AppointmentBookingProps) {
+  const { user, isLoaded } = useUser()
   const [step, setStep] = useState(1)
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedTime, setSelectedTime] = useState<string>('')
@@ -61,7 +64,11 @@ export function AppointmentBooking({
 
   const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([])
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
-  // const [pets, setPets] = useState<Pet[]>([]); // Removed: unused
+  const [pets] = useState([
+    { id: DEMO_PETS[0].id, name: DEMO_PETS[0].name, type: DEMO_PETS[0].species, breed: DEMO_PETS[0].breed },
+    { id: DEMO_PETS[1].id, name: DEMO_PETS[1].name, type: DEMO_PETS[1].species, breed: DEMO_PETS[1].breed },
+    { id: DEMO_PETS[2].id, name: DEMO_PETS[2].name, type: DEMO_PETS[2].species, breed: DEMO_PETS[2].breed },
+  ])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>('')
 
@@ -79,7 +86,7 @@ export function AppointmentBooking({
         )
         setVeterinarians(compatibleVets)
       } catch {
-        setError('Error al cargar veterinarios')
+        setError(UI_CONFIG.MESSAGES.ERROR_GENERIC)
       }
     }
 
@@ -101,7 +108,7 @@ export function AppointmentBooking({
         )
         setAvailableSlots(slots)
       } catch {
-        setError('Error al cargar horarios disponibles')
+        setError(UI_CONFIG.MESSAGES.ERROR_GENERIC)
       } finally {
         setIsLoading(false)
       }
@@ -120,7 +127,7 @@ export function AppointmentBooking({
       !selectedVeterinarian ||
       !selectedPet
     ) {
-      setError('Por favor completa todos los campos requeridos')
+      setError(UI_CONFIG.MESSAGES.ERROR_GENERIC)
       return
     }
 
@@ -135,7 +142,7 @@ export function AppointmentBooking({
       const endTimeString = format(endTime, 'HH:mm')
 
       const appointmentData = {
-        clientId: 'current_user_id', // Obtener del contexto de usuario
+        clientId: user?.id || 'anonymous', // Obtener del contexto de usuario
         petId: selectedPet,
         veterinarianId: selectedVeterinarian,
         serviceId: service.id,
@@ -163,7 +170,7 @@ export function AppointmentBooking({
 
       setStep(4) // Mostrar confirmación
     } catch {
-      setError('Error al crear la cita. Por favor intenta nuevamente.')
+      setError(UI_CONFIG.MESSAGES.ERROR_GENERIC)
     } finally {
       setIsLoading(false)
     }
@@ -295,9 +302,11 @@ export function AppointmentBooking({
                     <SelectValue placeholder="Selecciona tu mascota" />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* Aquí irían las mascotas del usuario */}
-                    <SelectItem value="pet1">Max (Perro)</SelectItem>
-                    <SelectItem value="pet2">Luna (Gato)</SelectItem>
+                    {pets.map((pet) => (
+                      <SelectItem key={pet.id} value={pet.id}>
+                        {pet.name} ({pet.type} - {pet.breed})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -315,12 +324,11 @@ export function AppointmentBooking({
               {/* Síntomas */}
               <div className="space-y-3 mb-6">
                 <Label>Síntomas (opcional)</Label>
-                <textarea
+                <Textarea
                   placeholder="Describe los síntomas que has observado..."
                   value={symptoms}
                   onChange={(e) => setSymptoms(e.target.value)}
                   rows={3}
-                  className="w-full border rounded p-2"
                 />
               </div>
 
@@ -356,12 +364,11 @@ export function AppointmentBooking({
               {/* Notas adicionales */}
               <div className="space-y-3">
                 <Label>Notas adicionales (opcional)</Label>
-                <textarea
+                <Textarea
                   placeholder="Información adicional que consideres importante..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
-                  className="w-full border rounded p-2"
                 />
               </div>
             </div>
@@ -435,6 +442,43 @@ export function AppointmentBooking({
       default:
         return false
     }
+  }
+
+  // Mostrar loading mientras se carga la información del usuario
+  if (!isLoaded) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="p-6 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Cargando...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Mostrar mensaje si el usuario no está autenticado
+  if (!user) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="p-6 text-center space-y-4">
+          <AlertCircle className="h-12 w-12 text-amber-500 mx-auto" />
+          <div>
+            <h3 className="text-lg font-semibold">Inicia Sesión para Continuar</h3>
+            <p className="text-muted-foreground">
+              Necesitas iniciar sesión para reservar una cita veterinaria.
+            </p>
+          </div>
+          <div className="flex gap-2 justify-center">
+            <Button onClick={onCancel} variant="outline">
+              Cancelar
+            </Button>
+            <Button onClick={() => window.location.href = '/login'}>
+              Iniciar Sesión
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   if (step === 4) {

@@ -98,6 +98,8 @@ export function CreateMedicalRecordDialog({
       const newRecord = await MedicalRecordService.createMedicalRecord(recordData)
       onRecordCreated?.(newRecord)
       setOpen(false)
+      // Forzar recarga para mostrar el nuevo registro
+      window.location.reload()
       
       // Resetear formulario
       setFormData({
