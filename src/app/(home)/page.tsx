@@ -26,12 +26,45 @@ export default function HomePage() {
   const [bestSellingProducts, setBestSellingProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const slides = [
+    {
+      id: 1,
+      src: '/hero-slide1.webp',
+      alt: 'Veterinario cuidando gato',
+      author: 'Aura',
+      date: 'Mayo 02, 2024',
+    },
+    {
+      id: 2,
+      src: '/hero-slide2.webp',
+      alt: 'Chequeo de cachorro',
+      author: 'Equipo Vet',
+      date: 'Junio 15, 2024',
+    },
+    {
+      id: 3,
+      src: '/hero-slide3.webp',
+      alt: 'Atención clínica perro',
+      author: 'Dr. López',
+      date: 'Julio 10, 2024',
+    },
+    {
+      id: 4,
+      src: '/hero-slide4.webp',
+      alt: 'Chequeo de gato cachorro',
+      author: 'Dr. López',
+      date: 'Julio 23, 2025',
+    },
+  ];
+
   useEffect(() => {
     const loadData = async () => {
       try {
         const [featured, bestSelling] = await Promise.all([
           ProductService.getFeaturedProducts(8),
-          ProductService.getBestSellingProducts(6)
+          ProductService.getBestSellingProducts(6),
         ]);
         setFeaturedProducts(featured);
         setBestSellingProducts(bestSelling);
@@ -40,7 +73,7 @@ export default function HomePage() {
       } finally {
         setTimeout(() => {
           setLoading(false);
-        }, 900);
+        }, 500);
       }
     };
 
@@ -52,70 +85,59 @@ export default function HomePage() {
   }
 
   return (
-
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-background py-10 sm:py-12 lg:py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <h1 className="text-4xl lg:text-6xl font-bold text-primary leading-tight">
-                  Cuidamos a tu mascota con
-                  <span className="text-foreground"> amor y profesionalismo</span>
-                </h1>
-                <p className="text-xl text-muted-foreground leading-relaxed">
-                  Tu clinica veterinaria de confianza. Productos de calidad, servicios especializados
-                  y gestion digital de historias clinicas para el bienestar de tu mascota.
-                </p>
-              </div>
+      <section className="relative h-[90vh] flex items-center justify-center">
+        {/* Fondo collage */}
+        <Image
+          src="/collage.webp"
+          alt="Collage mascotas"
+          fill
+          className="object-cover"
+          priority
+        />
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild>
-                  <Link href="/productos">
-                    <ShoppingCart className="mr-2 h-5 w-5" />
-                    Ver Productos
-                  </Link>
-                </Button>
-                <Button variant="outline" size="lg" asChild>
-                  <Link href="/citas">
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Reservar Cita
-                  </Link>
-                </Button>
+        {/* Overlay oscuro */}
+        <div className="absolute inset-0 bg-black/50" />
+
+        {/* Contenido centrado */}
+        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
+          <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
+            Cuidamos a tu mascota con amor y profesionalismo
+          </h1>
+          <p className="text-lg lg:text-xl text-white/90 mb-10">
+            Tu clínica veterinaria de confianza. Productos de calidad y
+            servicios especializados para el bienestar de tu mascota.
+          </p>
+
+          {/* Carrusel */}
+          <div className="max-w-3xl mx-auto">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+              <Image
+                src={slides[currentSlide].src}
+                alt={slides[currentSlide].alt}
+                width={600}
+                height={300}
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute bottom-3 left-4 text-white text-sm drop-shadow">
+                {slides[currentSlide].author} | {slides[currentSlide].date}
               </div>
             </div>
 
-            <div className="relative flex justify-center lg:justify-start">
-              <div className="relative z-10">
-                <Image
-                  src="/pets-hero.webp"
-                  alt="Veterinario cuidando mascota"
-                  width={600}
-                  height={400}
-                  className="rounded-2xl shadow-2xl w-full max-w-sm sm:max-w lg:max-w-[600px] h-auto"
-                  priority
+            {/* Dots navegación */}
+            <div className="flex justify-center gap-2 mt-4">
+              {slides.map((slide, idx) => (
+                <button
+                  key={slide.id}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    idx === currentSlide
+                      ? 'bg-white'
+                      : 'bg-white/50 hover:bg-white/80'
+                  }`}
                 />
-              </div>
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-4 -left-4 w-72 h-72 bg-secondary/20 rounded-full blur-3xl"></div>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="pt-12 flex flex-nowrap justify-center gap-12 sm:gap-28 lg:gap-40">
-            <div className="text-center shrink-0">
-              <div className="text-2xl font-bold text-primary">500+</div>
-              <div className="text-sm text-muted-foreground">Productos</div>
-            </div>
-            <div className="text-center shrink-0">
-              <div className="text-2xl font-bold text-primary">1000+</div>
-              <div className="text-sm text-muted-foreground">Clientes</div>
-            </div>
-            <div className="text-center shrink-0">
-              <div className="text-2xl font-bold text-primary">24/7</div>
-              <div className="text-sm text-muted-foreground">Emergencias</div>
+              ))}
             </div>
           </div>
         </div>
@@ -130,7 +152,8 @@ export default function HomePage() {
             </h2>
             <p className="text-muted-foreground">
               Ofrecemos una experiencia completa para el cuidado de tu mascota,
-              combinando productos de calidad con servicios veterinarios profesionales.
+              combinando productos de calidad con servicios veterinarios
+              profesionales.
             </p>
           </div>
 
@@ -207,26 +230,11 @@ export default function HomePage() {
             </Button>
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="aspect-square bg-muted animate-pulse" />
-                  <CardContent className="p-4">
-                    <div className="h-4 bg-muted rounded animate-pulse mb-2" />
-                    <div className="h-4 bg-muted rounded animate-pulse w-3/4 mb-2" />
-                    <div className="h-6 bg-muted rounded animate-pulse w-1/2" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -253,11 +261,11 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Examenes completos, diagnosticos y tratamientos personalizados
+                  Exámenes completos, diagnósticos y tratamientos personalizados
                   para tu mascota.
                 </p>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/servicios/consultas">Mas informacion</Link>
+                  <Link href="/servicios/consultas">Más información</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -267,15 +275,15 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Shield className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle>Vacunacion</CardTitle>
+                <CardTitle>Vacunación</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Programas completos de vacunacion para proteger a tu mascota
+                  Programas completos de vacunación para proteger a tu mascota
                   de enfermedades.
                 </p>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/servicios/vacunacion">Mas informacion</Link>
+                  <Link href="/servicios/vacunacion">Más información</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -285,15 +293,15 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                   <Heart className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle>Cirugias</CardTitle>
+                <CardTitle>Cirugías</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">
-                  Procedimientos quirurgicos con tecnologia avanzada y
-                  cuidado post-operatorio.
+                  Procedimientos quirúrgicos con tecnología avanzada y cuidado
+                  post-operatorio.
                 </p>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/servicios/cirugias">Mas informacion</Link>
+                  <Link href="/servicios/cirugias">Más información</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -316,7 +324,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold text-primary mb-2">
-                Productos Mas Vendidos
+                Productos Más Vendidos
               </h2>
               <p className="text-muted-foreground">
                 Los favoritos de nuestros clientes
@@ -324,32 +332,17 @@ export default function HomePage() {
             </div>
             <Button variant="outline" asChild>
               <Link href="/productos?sort=bestselling">
-                Ver mas
+                Ver más
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="aspect-square bg-muted animate-pulse" />
-                  <CardContent className="p-4">
-                    <div className="h-4 bg-muted rounded animate-pulse mb-2" />
-                    <div className="h-4 bg-muted rounded animate-pulse w-3/4 mb-2" />
-                    <div className="h-6 bg-muted rounded animate-pulse w-1/2" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {bestSellingProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {bestSellingProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -357,7 +350,7 @@ export default function HomePage() {
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">
-            Necesitas atencion de emergencia?
+            ¿Necesitas atención de emergencia?
           </h2>
           <p className="text-xl mb-8 opacity-90">
             Estamos disponibles 24/7 para emergencias veterinarias
@@ -367,7 +360,11 @@ export default function HomePage() {
               <Phone className="mr-2 h-5 w-5" />
               Llamar Emergencias: (01) 234-5678
             </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+            >
               <Calendar className="mr-2 h-5 w-5" />
               Reservar Cita
             </Button>
