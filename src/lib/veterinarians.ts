@@ -4,11 +4,9 @@ import {
   VeterinarianSpecialty, 
   WorkingHours
 } from '@/types/veterinary';
-import { 
-  SYSTEM_CONFIG, 
+import {
   DEMO_USERS, 
-  SCHEDULE_CONFIG,
-  HELPERS
+  SCHEDULE_CONFIG
 } from './constants';
 
 // Horario de trabajo por defecto usando constantes
