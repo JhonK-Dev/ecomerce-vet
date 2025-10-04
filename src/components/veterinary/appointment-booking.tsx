@@ -36,7 +36,7 @@ import { VeterinarianService } from '@/lib/veterinarians'
 import { AppointmentService } from '@/lib/appointments'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { DEMO_PETS, UI_CONFIG, SYSTEM_CONFIG } from '@/lib/constants'
+import { DEMO_PETS, UI_CONFIG } from '@/lib/constants'
 
 interface AppointmentBookingProps {
   service: VeterinaryService
