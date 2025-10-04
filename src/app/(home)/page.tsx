@@ -46,14 +46,14 @@ export default function HomePage() {
       id: 3,
       src: '/hero-slide3.webp',
       alt: 'Atención clínica perro',
-      author: 'Dr. López',
+      author: 'Jhon Kerry',
       date: 'Julio 10, 2024',
     },
     {
       id: 4,
       src: '/hero-slide4.webp',
       alt: 'Chequeo de gato cachorro',
-      author: 'Dr. López',
+      author: 'Michi López',
       date: 'Julio 23, 2025',
     },
   ];
@@ -79,6 +79,14 @@ export default function HomePage() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -86,8 +94,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-[90vh] flex items-center justify-center">
-        {/* Fondo collage */}
+      <section className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-b from-transparent to-background/10">
+        {/* Fondo */}
         <Image
           src="/collage.webp"
           alt="Collage mascotas"
@@ -96,47 +104,66 @@ export default function HomePage() {
           priority
         />
 
-        {/* Overlay oscuro */}
-        <div className="absolute inset-0 bg-black/50" />
-
         {/* Contenido centrado */}
-        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-          <h1 className="text-4xl lg:text-6xl font-bold text-white mb-4">
-            Cuidamos a tu mascota con amor y profesionalismo
-          </h1>
-          <p className="text-lg lg:text-xl text-white/90 mb-10">
-            Tu clínica veterinaria de confianza. Productos de calidad y
-            servicios especializados para el bienestar de tu mascota.
-          </p>
+        <div className="relative z-10 text-center px-4 w-full max-w-6xl mx-auto py-12">
+          <div className="space-y-46 lg:space-y-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              Cuidamos a tu mascota con amor y profesionalismo
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-4xl mx-auto leading-relaxed">
+              Tu clínica veterinaria de confianza. Productos de calidad y servicios especializados para el bienestar de tu mascota.
+            </p>
 
-          {/* Carrusel */}
-          <div className="max-w-3xl mx-auto">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
-              <Image
-                src={slides[currentSlide].src}
-                alt={slides[currentSlide].alt}
-                width={600}
-                height={300}
-                className="w-full h-auto object-cover"
-              />
-              <div className="absolute bottom-3 left-4 text-white text-sm drop-shadow">
-                {slides[currentSlide].author} | {slides[currentSlide].date}
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6 lg:mt-8">
+              <Button size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4 bg-green-800 hover:bg-green-600 text-white shadow-lg" asChild>
+                <Link href="/servicios">
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Reservar Cita
+                </Link>
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4 border-2 border-green-800 bg-white/95 text-green-800 hover:bg-green-800 hover:text-white shadow-lg" 
+                asChild
+              >
+                <Link href="/productos">
+                  Ver Productos
+                </Link>
+              </Button>
             </div>
 
-            {/* Dots navegación */}
-            <div className="flex justify-center gap-2 mt-4">
-              {slides.map((slide, idx) => (
-                <button
-                  key={slide.id}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    idx === currentSlide
-                      ? 'bg-white'
-                      : 'bg-white/50 hover:bg-white/80'
-                  }`}
+            {/* Carrusel */}
+            <div className="max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto mt-8 lg:mt-12">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm">
+                <Image
+                  src={slides[currentSlide].src}
+                  alt={slides[currentSlide].alt}
+                  width={600}
+                  height={350}
+                  className="w-full h-auto object-cover aspect-video"
+                  priority
                 />
-              ))}
+                
+                <div className="absolute bottom-20 right-12 text-white text-sm lg:text-base text-right" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.3), -2px -2px 4px rgba(0,0,0,0.3), 2px -2px 4px rgba(0,0,0,0.3), -2px 2px 4px rgba(0,0,0,0.3)'}}>
+                  <span className="font-medium">{slides[currentSlide].author}</span> | {slides[currentSlide].date}
+                </div>
+
+                {/* Dots navegación */}
+                <div className="absolute bottom-12 right-12 flex gap-3">
+                  {slides.map((slide, idx) => (
+                    <button
+                      key={slide.id}
+                      onClick={() => setCurrentSlide(idx)}
+                      className={`rounded-full transition-all duration-300 cursor-pointer ${
+                        idx === currentSlide
+                          ? 'w-3 h-3 bg-blue-500 scale-110'
+                          : 'w-3 h-3 bg-white/60 hover:bg-white/80'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
