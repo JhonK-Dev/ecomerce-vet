@@ -7,10 +7,7 @@ import {
   PaginationParams 
 } from '@/types/veterinary';
 import { 
-  SYSTEM_CONFIG, 
-  VETERINARY_SERVICES, 
-  SCHEDULE_CONFIG,
-  HELPERS
+  VETERINARY_SERVICES
 } from './constants';
 
 // Datos simulados de servicios veterinarios usando constantes

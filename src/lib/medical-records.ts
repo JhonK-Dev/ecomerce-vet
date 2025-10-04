@@ -12,12 +12,8 @@ import {
   PetFilters,
   MedicalStats
 } from '@/types/medical-records';
-import { 
-  SYSTEM_CONFIG, 
-  DEMO_USERS, 
-  DEMO_PETS, 
-  MEDICATIONS,
-  HELPERS
+import {  
+  DEMO_USERS 
 } from './constants';
 
 // Datos simulados - En producción usar base de datos real
