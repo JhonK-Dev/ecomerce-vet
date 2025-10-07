@@ -104,66 +104,70 @@ export default function HomePage() {
           priority
         />
 
-        {/* Contenido centrado */}
-        <div className="relative z-10 text-center px-4 w-full max-w-6xl mx-auto py-12">
-          <div className="space-y-46 lg:space-y-6">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-              Cuidamos a tu mascota con amor y profesionalismo
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-4xl mx-auto leading-relaxed">
-              Tu clínica veterinaria de confianza. Productos de calidad y servicios especializados para el bienestar de tu mascota.
-            </p>
+        {/* Contenido del hero */}
+        <div className="relative z-10 w-full py-4">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="text-center lg:text-left space-y-8">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                  Cuidamos a tu mascota con amor y profesionalismo
+                </h1>
+                <p className="text-base sm:text-lg md:text-lg text-white/90 leading-relaxed">
+                  Tu clínica veterinaria de confianza. Productos de calidad y servicios especializados para el bienestar de tu mascota.
+                </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6 lg:mt-8">
-              <Button size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4 bg-green-800 hover:bg-green-600 text-white shadow-lg" asChild>
-                <Link href="/servicios">
-                  <Calendar className="mr-2 h-5 w-5" />
-                  Reservar Cita
-                </Link>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4 border-2 border-green-800 bg-white/95 text-green-800 hover:bg-green-800 hover:text-white shadow-lg" 
-                asChild
-              >
-                <Link href="/productos">
-                  Ver Productos
-                </Link>
-              </Button>
-            </div>
-
-            {/* Carrusel */}
-            <div className="max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto mt-8 lg:mt-12">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm">
-                <Image
-                  src={slides[currentSlide].src}
-                  alt={slides[currentSlide].alt}
-                  width={600}
-                  height={350}
-                  className="w-full h-auto object-cover aspect-video"
-                  priority
-                />
-                
-                <div className="absolute bottom-20 right-12 text-white text-sm lg:text-base text-right" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.3), -2px -2px 4px rgba(0,0,0,0.3), 2px -2px 4px rgba(0,0,0,0.3), -2px 2px 4px rgba(0,0,0,0.3)'}}>
-                  <span className="font-medium">{slides[currentSlide].author}</span> | {slides[currentSlide].date}
-                </div>
-
-                {/* Dots navegación */}
-                <div className="absolute bottom-12 right-12 flex gap-3">
-                  {slides.map((slide, idx) => (
-                    <button
-                      key={slide.id}
-                      onClick={() => setCurrentSlide(idx)}
-                      className={`rounded-full transition-all duration-300 cursor-pointer ${
-                        idx === currentSlide
-                          ? 'w-3 h-3 bg-blue-500 scale-110'
-                          : 'w-3 h-3 bg-white/60 hover:bg-white/80'
-                      }`}
-                    />
-                  ))}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
+                  <Button size="lg" className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4 bg-green-800 hover:bg-green-600 text-white shadow-lg" asChild>
+                    <Link href="/servicios">
+                      <Calendar className="mr-2 h-5 w-5" />
+                      Reservar Cita
+                    </Link>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="text-base lg:text-lg px-6 lg:px-8 py-3 lg:py-4 border-2 border-green-800 bg-white/95 text-green-800 hover:bg-green-800 hover:text-white shadow-lg"
+                    asChild
+                  >
+                    <Link href="/productos">
+                      Ver Productos
+                    </Link>
+                  </Button>
                 </div>
               </div>
+
+              {/* Carrusel */}
+              <div className="w-full">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm">
+                  <Image
+                    src={slides[currentSlide].src}
+                    alt={slides[currentSlide].alt}
+                    width={600}
+                    height={350}
+                    className="w-full object-cover aspect-video"
+                    priority
+                  />
+
+                  <div className="absolute bottom-20 right-12 text-white text-sm lg:text-base text-right" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3), -2px -2px 4px rgba(0,0,0,0.3), 2px -2px 4px rgba(0,0,0,0.3), -2px 2px 4px rgba(0,0,0,0.3)' }}>
+                    <span className="font-medium">{slides[currentSlide].author}</span> | {slides[currentSlide].date}
+                  </div>
+
+                  {/* Dots navegación */}
+                  <div className="absolute bottom-12 right-12 flex gap-3">
+                    {slides.map((slide, idx) => (
+                      <button
+                        key={slide.id}
+                        onClick={() => setCurrentSlide(idx)}
+                        className={`rounded-full transition-all duration-300 cursor-pointer ${idx === currentSlide
+                            ? 'w-3 h-3 bg-blue-500 scale-110'
+                            : 'w-3 h-3 bg-white/60 hover:bg-white/80'
+                          }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
